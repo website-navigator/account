@@ -1,4 +1,4 @@
-package gq.optimalorange.account.api;
+package gq.optimalorange.account;
 
 public interface AuthenticationService extends Service {
 
