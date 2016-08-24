@@ -1,3 +1,11 @@
 rootProject.name = 'account'
 
-//include ':business'
+// api
+include 'api'
+include 'internal-api'
+// public module
+include 'subject'
+include 'authentication'
+// internal module
+include 'configuration'
+include 'storage'

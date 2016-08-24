@@ -2,12 +2,17 @@
 
 def javaProjects = []
 
-javaProjects << ':'
+javaProjects << 'api'
+javaProjects << 'internal-api'
+javaProjects << 'subject'
+javaProjects << 'authentication'
+javaProjects << 'configuration'
+javaProjects << 'storage'
 
 project(javaProjects) {
     apply plugin: 'java'
 
-    sourceCompatibility = JavaVersion.VERSION_1_7
+    sourceCompatibility = JavaVersion.VERSION_1_8
 }
 
 project(javaProjects) {
