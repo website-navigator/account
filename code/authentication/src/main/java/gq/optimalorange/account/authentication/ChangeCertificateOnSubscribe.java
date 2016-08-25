@@ -80,8 +80,7 @@ public class ChangeCertificateOnSubscribe
 
       serviceRegister.getService(oldCertificate.getType()).flatMap(service -> {
         if (service.succeeded()) {
-          return service.result()
-              .changeCertificate(identifier, forAuthenticate, oldCertificate, newCertificate);
+          return service.result().changeCertificate(identifier, oldCertificate, newCertificate);
         } else {
           final Result<Void, ChangeCertificateFailureCause> fail =
               Results.fail(ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
