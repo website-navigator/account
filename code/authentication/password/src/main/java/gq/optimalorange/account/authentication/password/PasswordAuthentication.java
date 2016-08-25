@@ -21,7 +21,7 @@ import rx.Single;
 @Singleton
 public class PasswordAuthentication implements AuthenticationSpi {
 
-  private static final String NAMESPACE = "PasswordAuthentication";
+  private static final String NAMESPACE = "password";
 
   private static final String KEY = "password";
 

@@ -13,6 +13,8 @@ javaProjects << 'authentication:password'
 javaProjects << 'configuration'
 javaProjects << 'storage:memory'
 
+javaProjects << 'integration'
+
 project(javaProjects) {
     apply plugin: 'java'
 

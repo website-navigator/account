@@ -11,3 +11,5 @@ include 'authentication:password'
 // internal module
 include 'configuration'
 include 'storage:memory'
+// integration
+include 'integration'
