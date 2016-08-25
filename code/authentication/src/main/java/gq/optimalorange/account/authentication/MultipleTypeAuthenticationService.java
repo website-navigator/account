@@ -42,7 +42,7 @@ public class MultipleTypeAuthenticationService implements AuthenticationService 
   }
 
   @Override
-  public Single<Result<Boolean, AuthenticateFailureCause>> authenticate(
+  public Single<Result<Void, AuthenticateFailureCause>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate) {
     return serviceRegister.getService(certificate.getType()).flatMap(service -> {
       if (service.succeeded()) {

@@ -57,7 +57,7 @@ public class ChangeCertificateOnSubscribe
   }
 
   private class AuthenticateSingleSubscriber
-      extends SingleSubscriber<Result<Boolean, AuthenticateFailureCause>> {
+      extends SingleSubscriber<Result<Void, AuthenticateFailureCause>> {
 
     private final SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual;
 
@@ -67,23 +67,15 @@ public class ChangeCertificateOnSubscribe
     }
 
     @Override
-    public void onSuccess(Result<Boolean, AuthenticateFailureCause> authResult) {
+    public void onSuccess(Result<Void, AuthenticateFailureCause> authResult) {
       if (authResult.succeeded()) {
-        onAuthenticateSucceeded(authResult.result());
+        onAuthenticateSucceeded();
       } else {
         onAuthenticateFailed(authResult.cause());
       }
     }
 
-    private void onAuthenticateSucceeded(boolean AuthenticateResult) {
-      if (AuthenticateResult) {
-        onAuthenticatePassed();
-      } else {
-        fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
-      }
-    }
-
-    private void onAuthenticatePassed() {
+    private void onAuthenticateSucceeded() {
       GetServiceSingleSubscriber parent = new GetServiceSingleSubscriber(actual);
       actual.add(parent);
       serviceRegister.getService(oldCertificate.getType()).subscribe(parent);
@@ -93,6 +85,9 @@ public class ChangeCertificateOnSubscribe
       switch (cause) {
         case SUBJECT_NOT_EXIST:
           fail(actual, ChangeCertificateFailureCause.SUBJECT_NOT_EXIST);
+          break;
+        case WRONG_CERTIFICATE:
+          fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
           break;
         case NOT_SUPPORTED_CERTIFICATE_TYPE:
           fail(actual, ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);

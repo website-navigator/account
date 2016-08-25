@@ -42,11 +42,12 @@ public interface AuthenticationService extends Service {
     NOT_SAME_CERTIFICATE_TYPE
   }
 
-  Single<Result<Boolean, AuthenticateFailureCause>> authenticate(
+  Single<Result<Void, AuthenticateFailureCause>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate);
 
   enum AuthenticateFailureCause {
     SUBJECT_NOT_EXIST,
+    WRONG_CERTIFICATE,
     NOT_SUPPORTED_CERTIFICATE_TYPE
   }
 
