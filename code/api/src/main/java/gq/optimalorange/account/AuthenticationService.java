@@ -29,7 +29,7 @@ public interface AuthenticationService extends Service {
     NOT_SUPPORTED_CERTIFICATE_TYPE
   }
 
-  Single<Result<Void, RemoveCertificateFailureCause>> changeCertificate(
+  Single<Result<Void, ChangeCertificateFailureCause>> changeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate oldCertificate,
@@ -38,15 +38,15 @@ public interface AuthenticationService extends Service {
   enum ChangeCertificateFailureCause {
     SUBJECT_NOT_EXIST,
     WRONG_CERTIFICATE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    NOT_SAME_CERTIFICATE_TYPE
   }
 
-  Single<Result<Void, AuthenticateFailureCause>> authenticate(
+  Single<Result<Boolean, AuthenticateFailureCause>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate);
 
   enum AuthenticateFailureCause {
     SUBJECT_NOT_EXIST,
-    WRONG_CERTIFICATE,
     NOT_SUPPORTED_CERTIFICATE_TYPE
   }
 
