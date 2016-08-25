@@ -18,17 +18,17 @@ import okio.ByteString;
 @NotThreadSafe
 public class MemoryDatabase {
 
-  volatile long counter = 1;
+  private volatile long counter = 1;
 
-  BidiMap<String, String> idUsernameMap = new DualHashBidiMap<>();
+  private final BidiMap<String, String> idUsernameMap = new DualHashBidiMap<>();
 
-  Map<String, Map<String, Map<String, ByteString>>> data = new HashMap<>();
+  private final Map<String, Map<String, Map<String, ByteString>>> data = new HashMap<>();
 
   @Inject
   public MemoryDatabase() {
   }
 
-  String create() {
+  public String create() {
     String id = null;
     do {
       String nextId = String.valueOf(counter++);
@@ -66,7 +66,7 @@ public class MemoryDatabase {
     return document.get(nameSpace);
   }
 
-  Failure saveValueWithId(@Nonnull String id, @Nonnull String nameSpace, @Nonnull String key,
+  public Failure saveValueWithId(@Nonnull String id, @Nonnull String nameSpace, @Nonnull String key,
                           @Nonnull ByteString value) {
     Map<String, ByteString> nameSpaceMap = getNameSpace(id, nameSpace);
     if (nameSpaceMap == null) {
