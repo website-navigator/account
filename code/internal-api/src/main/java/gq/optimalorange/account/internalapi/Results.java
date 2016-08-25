@@ -10,12 +10,12 @@ public class Results {
 
   @Nonnull
   public static <T, E> Result<T, E> succeed(T result) {
-    return new ResultImpl<>(result, null);
+    return new ResultImpl<>(true, result, null);
   }
 
   @Nonnull
   public static <T, E> Result<T, E> fail(E cause) {
-    return new ResultImpl<>(null, cause);
+    return new ResultImpl<>(false, null, cause);
   }
 
   @Nonnull
@@ -36,16 +36,10 @@ public class Results {
 
     private final E cause;
 
-    private ResultImpl(T result, E cause) {
-      if (result != null) {
-        succeeded = true;
-        this.result = result;
-        this.cause = null;
-      } else {
-        succeeded = false;
-        this.result = null;
-        this.cause = cause;
-      }
+    private ResultImpl(boolean succeeded, T result, E cause) {
+      this.succeeded = succeeded;
+      this.result = result;
+      this.cause = cause;
     }
 
     @Override
