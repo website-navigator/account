@@ -6,7 +6,6 @@ import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailureCa
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.authentication.AuthenticationServiceRegister.GetServiceFailureCause;
 import gq.optimalorange.account.internalapi.Results;
 import rx.Single;
 import rx.SingleSubscriber;
@@ -76,9 +75,19 @@ public class ChangeCertificateOnSubscribe
     }
 
     private void onAuthenticateSucceeded() {
-      GetServiceSingleSubscriber parent = new GetServiceSingleSubscriber(actual);
+      ChangeCertificateSingleSubscriber parent = new ChangeCertificateSingleSubscriber(actual);
       actual.add(parent);
-      serviceRegister.getService(oldCertificate.getType()).subscribe(parent);
+
+      serviceRegister.getService(oldCertificate.getType()).flatMap(service -> {
+        if (service.succeeded()) {
+          return service.result()
+              .changeCertificate(identifier, forAuthenticate, oldCertificate, newCertificate);
+        } else {
+          final Result<Void, ChangeCertificateFailureCause> fail =
+              Results.fail(ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
+          return Single.just(fail);
+        }
+      }).subscribe(parent);
     }
 
     private void onAuthenticateFailed(AuthenticateFailureCause cause) {
@@ -104,39 +113,6 @@ public class ChangeCertificateOnSubscribe
         actual.onError(error);
       }
     }
-  }
-
-  private class GetServiceSingleSubscriber
-      extends SingleSubscriber<Result<AuthenticationService, GetServiceFailureCause>> {
-
-    private final SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual;
-
-    private GetServiceSingleSubscriber(
-        SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual) {
-      this.actual = actual;
-    }
-
-    @Override
-    public void onSuccess(
-        Result<AuthenticationService, GetServiceFailureCause> service) {
-      if (service.succeeded()) {
-        ChangeCertificateSingleSubscriber parent = new ChangeCertificateSingleSubscriber(actual);
-        actual.add(parent);
-        service.result()
-            .changeCertificate(identifier, forAuthenticate, oldCertificate, newCertificate)
-            .subscribe(parent);
-      } else {
-        fail(actual, ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
-      }
-    }
-
-    @Override
-    public void onError(Throwable error) {
-      if (!actual.isUnsubscribed()) {
-        actual.onError(error);
-      }
-    }
-
   }
 
   private class ChangeCertificateSingleSubscriber
