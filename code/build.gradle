@@ -4,8 +4,12 @@ def javaProjects = []
 
 javaProjects << 'api'
 javaProjects << 'internal-api'
+
 javaProjects << 'subject'
-javaProjects << 'authentication'
+javaProjects << 'authentication:main'
+javaProjects << 'authentication:spi'
+javaProjects << 'authentication:password'
+
 javaProjects << 'configuration'
 javaProjects << 'storage'
 

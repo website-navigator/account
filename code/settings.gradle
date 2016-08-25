@@ -5,7 +5,9 @@ include 'api'
 include 'internal-api'
 // public module
 include 'subject'
-include 'authentication'
+include 'authentication:main'
+include 'authentication:spi'
+include 'authentication:password'
 // internal module
 include 'configuration'
 include 'storage'
