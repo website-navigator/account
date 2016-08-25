@@ -1,6 +1,8 @@
 package gq.optimalorange.account.authentication.password;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
@@ -16,6 +18,7 @@ import okio.ByteString;
 import rx.Observable;
 import rx.Single;
 
+@Singleton
 public class PasswordAuthentication implements AuthenticationSpi {
 
   private static final String NAMESPACE = "PasswordAuthentication";
@@ -24,6 +27,7 @@ public class PasswordAuthentication implements AuthenticationSpi {
 
   private final SubjectStorageService storageService;
 
+  @Inject
   public PasswordAuthentication(SubjectStorageService storageService) {
     this.storageService = storageService;
   }

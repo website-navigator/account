@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
+import javax.inject.Inject;
 
 import gq.optimalorange.account.Result;
 import gq.optimalorange.account.internalapi.Results;
@@ -22,6 +23,10 @@ public class MemoryDatabase {
   BidiMap<String, String> idUsernameMap = new DualHashBidiMap<>();
 
   Map<String, Map<String, Map<String, ByteString>>> data = new HashMap<>();
+
+  @Inject
+  public MemoryDatabase() {
+  }
 
   String create() {
     String id = null;

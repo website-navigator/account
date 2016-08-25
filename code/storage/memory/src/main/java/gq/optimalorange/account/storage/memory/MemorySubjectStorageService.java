@@ -1,6 +1,8 @@
 package gq.optimalorange.account.storage.memory;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
@@ -11,10 +13,12 @@ import rx.Single;
 import rx.SingleSubscriber;
 
 //TODO thread
+@Singleton
 public class MemorySubjectStorageService implements SubjectStorageService {
 
   private final MemoryDatabase database;
 
+  @Inject
   public MemorySubjectStorageService(MemoryDatabase database) {
     this.database = database;
   }

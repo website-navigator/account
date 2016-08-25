@@ -28,6 +28,10 @@ project(javaProjects) {
     }
 
     dependencies {
+        def daggerVersion = '2.6.1'
+        compile "com.google.dagger:dagger:$daggerVersion"
+        compileOnly "com.google.dagger:dagger-compiler:$daggerVersion"
+        // test
         testCompile 'junit:junit:4.12'
     }
 }

@@ -1,6 +1,8 @@
 package gq.optimalorange.account.authentication;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.Certificate;
@@ -9,10 +11,12 @@ import gq.optimalorange.account.Result;
 import gq.optimalorange.account.internalapi.Results;
 import rx.Single;
 
+@Singleton
 public class MultipleTypeAuthenticationService implements AuthenticationService {
 
   private final AuthenticationServiceRegister serviceRegister;
 
+  @Inject
   public MultipleTypeAuthenticationService(AuthenticationServiceRegister serviceRegister) {
     this.serviceRegister = serviceRegister;
   }
