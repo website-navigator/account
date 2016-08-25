@@ -6,6 +6,8 @@ import okio.ByteString;
 
 public abstract class Certificate {
 
+  public static final String TYPE_PASSWORD = "password";
+
   private final ByteString value;
 
   protected Certificate(@Nonnull ByteString value) {

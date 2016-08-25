@@ -37,6 +37,7 @@ public interface AuthenticationService extends Service {
 
   enum ChangeCertificateFailureCause {
     SUBJECT_NOT_EXIST,
+    NOT_EXIST,
     WRONG_CERTIFICATE,
     NOT_SUPPORTED_CERTIFICATE_TYPE,
     NOT_SAME_CERTIFICATE_TYPE
