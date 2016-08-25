@@ -11,14 +11,19 @@ public interface SubjectService extends Service {
    */
   Single<Result<Identifier, Void>> create();
 
-  Single<Result<Void, Void>> exist(@Nonnull Identifier identifier);
+  Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier);
+
+  enum ExistFailureCause {
+    NOT_SUPPORTED_IDENTIFIER_TYPE
+  }
 
   Single<Result<Identifier, GetIdentifierFailureCause>> getId(@Nonnull Identifier identifier);
 
   Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(@Nonnull Identifier identifier);
 
   enum GetIdentifierFailureCause {
-    NOT_EXIST
+    NOT_EXIST,
+    NOT_SUPPORTED_IDENTIFIER_TYPE
   }
 
 }
