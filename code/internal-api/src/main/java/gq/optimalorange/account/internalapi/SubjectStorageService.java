@@ -34,6 +34,7 @@ public interface SubjectStorageService extends StorageService, SubjectService {
       @Nonnull String key);
 
   enum FailureCause {
+    UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     NOT_EXIST
   }

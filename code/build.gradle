@@ -11,7 +11,7 @@ javaProjects << 'authentication:spi'
 javaProjects << 'authentication:password'
 
 javaProjects << 'configuration'
-javaProjects << 'storage'
+javaProjects << 'storage:memory'
 
 project(javaProjects) {
     apply plugin: 'java'

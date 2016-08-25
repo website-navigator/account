@@ -17,6 +17,10 @@ public class Identifier {
     return new Identifier(type, value);
   }
 
+  public static Identifier id(@Nonnull String id) {
+    return create(TYPE_ID, id);
+  }
+
   private Identifier(@Nonnull String type, @Nonnull String value) {
     this.type = type;
     this.value = value;
