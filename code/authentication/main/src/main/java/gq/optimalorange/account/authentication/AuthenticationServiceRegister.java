@@ -35,8 +35,8 @@ public class AuthenticationServiceRegister {
     });
   }
 
-  public void addService(@Nonnull String type, @Nonnull AuthenticationSpi service) {
-    authServices.put(type, service);
+  public void addService(@Nonnull AuthenticationSpi service) {
+    authServices.put(service.authenticationType(), service);
   }
 
   enum GetServiceFailureCause {
