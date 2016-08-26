@@ -17,7 +17,6 @@ import gq.optimalorange.account.internalapi.SubjectStorageService.FailureCause;
 import okio.ByteString;
 import rx.Observable;
 import rx.Single;
-import rx.observables.ConnectableObservable;
 
 @Singleton
 public class PasswordAuthentication implements AuthenticationSpi {
@@ -95,33 +94,29 @@ public class PasswordAuthentication implements AuthenticationSpi {
       @Nonnull Identifier identifier, @Nonnull Certificate certificate) {
     // * read password
     // * compare password
-    return Single.create(singleSubscriber -> {
-      final ConnectableObservable<Result<ByteString, FailureCause>> retrieve =
-          storageService.retrieveValue(identifier, NAMESPACE, KEY).toObservable().publish(); // read
+    final Observable<Result<ByteString, FailureCause>> retrieve =
+        storageService.retrieveValue(identifier, NAMESPACE, KEY).toObservable().share(); // read
 
-      final Observable<Result<Void, AuthenticateFailureCause>> compared = retrieve
-          .filter(Result::succeeded)
-          .map(value -> value.result().equals(certificate.getValue())) // compare
-          .map(value -> {
-            if (value) {
-              return Results.succeed(null);
-            } else {
-              return Results.fail(AuthenticateFailureCause.WRONG_CERTIFICATE);
-            }
-          });
+    final Observable<Result<Void, AuthenticateFailureCause>> compared = retrieve
+        .filter(Result::succeeded)
+        .map(value -> value.result().equals(certificate.getValue())) // compare
+        .map(value -> {
+          if (value) {
+            return Results.succeed(null);
+          } else {
+            return Results.fail(AuthenticateFailureCause.WRONG_CERTIFICATE);
+          }
+        });
 
-      final Observable<Result<Void, AuthenticateFailureCause>> noSubject = retrieve
-          .filter(value -> value.failed() && value.cause() == FailureCause.SUBJECT_NOT_EXIST)
-          .map(value -> Results.fail(AuthenticateFailureCause.SUBJECT_NOT_EXIST));
+    final Observable<Result<Void, AuthenticateFailureCause>> noSubject = retrieve
+        .filter(value -> value.failed() && value.cause() == FailureCause.SUBJECT_NOT_EXIST)
+        .map(value -> Results.fail(AuthenticateFailureCause.SUBJECT_NOT_EXIST));
 
-      final Observable<Result<Void, AuthenticateFailureCause>> notExist = retrieve
-          .filter(value -> value.failed() && value.cause() == FailureCause.NOT_EXIST)
-          .map(value -> Results.fail(AuthenticateFailureCause.WRONG_CERTIFICATE));
+    final Observable<Result<Void, AuthenticateFailureCause>> notExist = retrieve
+        .filter(value -> value.failed() && value.cause() == FailureCause.NOT_EXIST)
+        .map(value -> Results.fail(AuthenticateFailureCause.WRONG_CERTIFICATE));
 
-      Observable.merge(compared, noSubject, notExist).toSingle().subscribe(singleSubscriber);
-
-      retrieve.connect();
-    });
+    return Observable.merge(compared, noSubject, notExist).toSingle();
   }
 
 }
