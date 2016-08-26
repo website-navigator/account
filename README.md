@@ -2,10 +2,11 @@
 
 # 账户系统
 
-## build
+## build && run
 1. 安装配置 JDK 8
 2. `cd code`
-3. `./gradlew run` 或 `./gradlew -q run`
+3. `./gradlew build`
+4. `./gradlew run` 或 `./gradlew -q run`
 
 ## License
 Apache License, Version 2.0
