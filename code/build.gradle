@@ -39,6 +39,18 @@ project(javaProjects) {
     }
 }
 
+// code coverage
+project(javaProjects) {
+    apply plugin: "jacoco"
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
+    }
+}
+// code coverage end
+
 Iterable project(Iterable<String> projects, Closure configureClosure) {
     projects.collect {project(it, configureClosure)}
 }
