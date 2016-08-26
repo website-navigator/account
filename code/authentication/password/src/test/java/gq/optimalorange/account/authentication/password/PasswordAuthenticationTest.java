@@ -24,7 +24,7 @@ import static org.mockito.Mockito.times;
 
 public class PasswordAuthenticationTest {
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testAuthenticateWithNull() {
     // given
     SubjectStorageService storage = mock(SubjectStorageService.class);
@@ -36,10 +36,7 @@ public class PasswordAuthenticationTest {
     PasswordAuthentication test = new PasswordAuthentication(storage);
     test.authenticate(Identifier.id("test"), Certificate.password("password")).subscribe(logger);
 
-    // then
-    then(storage).should().retrieveValue(any(), any(), any());
-    logger.assertError(NullPointerException.class);
-    logger.assertValueCount(0);
+    // then threw NullPointerException
   }
 
   @Test
