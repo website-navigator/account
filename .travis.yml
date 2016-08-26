@@ -1,0 +1,23 @@
+sudo: false
+
+# let Gradle to use plain console output.
+# see http://stackoverflow.com/questions/17942819/how-can-i-get-clean-gradle-output-on-travis-ci
+env: TERM=dumb
+
+language: java
+
+jdk: oraclejdk8
+
+before_install: cd code
+
+script:
+    - ./gradlew build
+
+# Caching
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
