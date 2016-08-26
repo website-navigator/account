@@ -5,6 +5,7 @@ import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.integration.inject.MainComponent;
 import gq.optimalorange.account.integration.inject.DaggerMainComponent;
+import gq.optimalorange.account.integration.utils.Debugger;
 
 public class Main implements Runnable {
 
@@ -12,10 +13,26 @@ public class Main implements Runnable {
     new Main().run();
   }
 
+  static final boolean DEBUG = false;
+
   MainComponent mainComponent;
 
   @Override
   public void run() {
+    Debugger debugger;
+    if (DEBUG) {
+      debugger = new Debugger();
+      debugger.start();
+    }
+
+    doTask();
+
+    if (DEBUG) {
+      debugger.stop();
+    }
+  }
+
+  private void doTask() {
     mainComponent = DaggerMainComponent.create();
     println(mainComponent.getSubjectService());
     final AuthenticationService auth = mainComponent.getAuthenticationService();
