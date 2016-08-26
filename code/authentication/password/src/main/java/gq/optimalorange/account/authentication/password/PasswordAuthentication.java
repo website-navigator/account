@@ -98,8 +98,10 @@ public class PasswordAuthentication implements AuthenticationSpi {
         storageService.retrieveValue(identifier, NAMESPACE, KEY) // read
             .toObservable()
             .cacheWithInitialCapacity(1);
-//            .publish()
-//            .autoConnect(3);
+            /*.replay()
+            .autoConnect();*/
+            /*.publish()
+            .autoConnect(3);*/
 
     final Observable<Result<Void, AuthenticateFailureCause>> compared = retrieve
         .filter(Result::succeeded)
