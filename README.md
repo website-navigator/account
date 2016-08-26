@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/website-navigator/account.svg?branch=master)](https://travis-ci.org/website-navigator/account)
+[![codecov](https://codecov.io/gh/website-navigator/account/branch/master/graph/badge.svg)](https://codecov.io/gh/website-navigator/account)
 [![codebeat badge](https://codebeat.co/badges/93d4d981-cce8-424f-8920-4cfc9a58fed8)](https://codebeat.co/projects/github-com-website-navigator-account)
 
 # 账户系统
