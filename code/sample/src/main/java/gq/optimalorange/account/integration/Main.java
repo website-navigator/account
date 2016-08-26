@@ -1,11 +1,12 @@
 package gq.optimalorange.account.integration;
 
 import gq.optimalorange.account.AuthenticationService;
-import gq.optimalorange.account.Certificate;
-import gq.optimalorange.account.Identifier;
-import gq.optimalorange.account.integration.inject.MainComponent;
 import gq.optimalorange.account.integration.inject.DaggerMainComponent;
+import gq.optimalorange.account.integration.inject.MainComponent;
 import gq.optimalorange.account.integration.utils.Debugger;
+
+import static gq.optimalorange.account.Certificate.password;
+import static gq.optimalorange.account.Identifier.id;
 
 public class Main implements Runnable {
 
@@ -37,7 +38,7 @@ public class Main implements Runnable {
     println(mainComponent.getSubjectService());
     final AuthenticationService auth = mainComponent.getAuthenticationService();
     println(auth);
-    auth.authenticate(Identifier.id("1"), Certificate.password("test")).subscribe(result->{
+    auth.authenticate(id("1"), password("test")).subscribe(result -> {
       if (result.succeeded()) {
         println("authenticate succeeded!");
       } else {

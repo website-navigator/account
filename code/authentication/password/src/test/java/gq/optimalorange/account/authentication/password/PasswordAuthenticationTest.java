@@ -4,16 +4,18 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import gq.optimalorange.account.AuthenticationService;
-import gq.optimalorange.account.Certificate;
-import gq.optimalorange.account.Identifier;
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.internalapi.Results;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
+import gq.optimalorange.account.internalapi.SubjectStorageService.FailureCause;
 import okio.ByteString;
 import rx.Single;
 import rx.observers.TestSubscriber;
 
+import static gq.optimalorange.account.Certificate.password;
+import static gq.optimalorange.account.Identifier.id;
+import static gq.optimalorange.account.internalapi.Results.succeed;
+import static okio.ByteString.encodeUtf8;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,12 +31,11 @@ public class PasswordAuthenticationTest {
     // given
     SubjectStorageService storage = mock(SubjectStorageService.class);
     given(storage.retrieveValue(any(), any(), any())).willReturn(null);
-    TestSubscriber<Result<Void, AuthenticationService.AuthenticateFailureCause>> logger =
-        TestSubscriber.create();
+    TestSubscriber<Result<Void, AuthenticateFailureCause>> logger = TestSubscriber.create();
 
     // when
     PasswordAuthentication test = new PasswordAuthentication(storage);
-    test.authenticate(Identifier.id("test"), Certificate.password("password")).subscribe(logger);
+    test.authenticate(id("test"), password("password")).subscribe(logger);
 
     // then threw NullPointerException
   }
@@ -42,25 +43,22 @@ public class PasswordAuthenticationTest {
   @Test
   public void testAuthenticateRetrieveValueOnce() {
     // given
-    final Result<ByteString, SubjectStorageService.FailureCause> passwordResult =
-        Results.succeed(ByteString.encodeUtf8("test").sha256());
+    final Result<ByteString, FailureCause> passwordResult = succeed(encodeUtf8("test").sha256());
 
     AtomicLong subscribeCounter = new AtomicLong(0);
-    Single<Result<ByteString, SubjectStorageService.FailureCause>> value =
-        Single.create(subscriber -> {
-          subscribeCounter.incrementAndGet();
-          subscriber.onSuccess(passwordResult);
-        });
+    Single<Result<ByteString, FailureCause>> value = Single.create(subscriber -> {
+      subscribeCounter.incrementAndGet();
+      subscriber.onSuccess(passwordResult);
+    });
 
     SubjectStorageService storage = mock(SubjectStorageService.class);
     given(storage.retrieveValue(any(), any(), any())).willReturn(value);
 
-    TestSubscriber<Result<Void, AuthenticationService.AuthenticateFailureCause>> logger =
-        TestSubscriber.create();
+    TestSubscriber<Result<Void, AuthenticateFailureCause>> logger = TestSubscriber.create();
 
     // when
     PasswordAuthentication tested = new PasswordAuthentication(storage);
-    tested.authenticate(Identifier.id("17"), Certificate.password("test")).subscribe(logger);
+    tested.authenticate(id("17"), password("test")).subscribe(logger);
 
     // then
     then(storage).should(times(1)).retrieveValue(any(), any(), any());
