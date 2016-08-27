@@ -1,4 +1,4 @@
-package gq.optimalorange.account.integration.inject;
+package gq.optimalorange.account.sample.inject;
 
 import javax.inject.Singleton;
 

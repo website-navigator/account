@@ -1,4 +1,4 @@
-package gq.optimalorange.account.integration.utils;
+package gq.optimalorange.account.sample.utils;
 
 import rx.plugins.DebugHook;
 import rx.plugins.DebugNotification;

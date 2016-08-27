@@ -2,7 +2,7 @@ plugins {
   id "application"
 }
 
-mainClassName = "${group}.integration.Main"
+mainClassName = "${group}.sample.Main"
 
 
 dependencies {

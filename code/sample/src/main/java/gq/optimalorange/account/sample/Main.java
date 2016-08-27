@@ -1,12 +1,12 @@
-package gq.optimalorange.account.integration;
+package gq.optimalorange.account.sample;
 
 import java.util.concurrent.CountDownLatch;
 
 import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.integration.inject.DaggerMainComponent;
-import gq.optimalorange.account.integration.inject.MainComponent;
-import gq.optimalorange.account.integration.utils.Debugger;
+import gq.optimalorange.account.sample.inject.DaggerMainComponent;
+import gq.optimalorange.account.sample.inject.MainComponent;
+import gq.optimalorange.account.sample.utils.Debugger;
 import rx.schedulers.Schedulers;
 
 import static gq.optimalorange.account.Certificate.password;
