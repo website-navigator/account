@@ -6,6 +6,8 @@ import javax.inject.Singleton;
 
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
+import gq.optimalorange.account.SubjectService.ExistFailureCause;
+import gq.optimalorange.account.SubjectService.GetIdentifierFailureCause;
 import gq.optimalorange.account.internalapi.Results;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
 import okio.ByteString;

@@ -1,10 +1,14 @@
 package gq.optimalorange.account;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 import rx.Single;
 
 public interface AuthenticationService extends Service {
+
+  Single<Result<List<String>, Void>> getSupportedCertificateTypes();
 
   Single<Result<Void, AddCertificateFailureCause>> addCertificate(
       @Nonnull Identifier identifier,

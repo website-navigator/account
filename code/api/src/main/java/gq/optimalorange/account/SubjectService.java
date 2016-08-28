@@ -9,7 +9,12 @@ public interface SubjectService extends Service {
   /**
    * @return the ID of new created Subject
    */
-  Single<Result<Identifier, Void>> create();
+  Single<Result<Identifier, CreateFailure>> create(@Nonnull Certificate initialCertificate);
+
+  enum CreateFailure {
+    CREATE_FAILURE,
+    NOT_SUPPORTED_CERTIFICATE_TYPE
+  }
 
   Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier);
 

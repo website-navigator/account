@@ -1,5 +1,7 @@
 package gq.optimalorange.account.authentication;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,6 +21,11 @@ public class MultipleTypeAuthenticationService implements AuthenticationService 
   @Inject
   public MultipleTypeAuthenticationService(AuthenticationServiceRegister serviceRegister) {
     this.serviceRegister = serviceRegister;
+  }
+
+  @Override
+  public Single<Result<List<String>, Void>> getSupportedCertificateTypes() {
+    throw new UnsupportedOperationException(); //TODO
   }
 
   @Override
