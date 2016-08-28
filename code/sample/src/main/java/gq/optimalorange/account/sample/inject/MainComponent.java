@@ -15,8 +15,8 @@ import gq.optimalorange.account.subject.SubjectModule;
     SubjectModule.class,
     AuthenticationModule.class,
     PasswordAuthenticationSpiModule.class,
-    /*MemoryStorageModule.class,*/
-    CustomModule.class
+    MemoryStorageModule.class,
+    MockDataModule.class
 })
 public interface MainComponent {
 
