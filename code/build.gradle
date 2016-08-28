@@ -13,6 +13,7 @@ javaProjects << 'authentication:password'
 javaProjects << 'configuration'
 javaProjects << 'storage:memory'
 
+javaProjects << 'benchmark'
 javaProjects << 'sample'
 
 project(javaProjects) {

@@ -1,0 +1,16 @@
+plugins {
+  id "application"
+}
+
+mainClassName = "${group}.benchmark.Main"
+
+
+dependencies {
+  compile project(':api')
+  compile project(':subject')
+  compile project(':authentication:main')
+  compile project(':authentication:password')
+  compile project(':storage:memory')
+
+  compile 'org.apache.commons:commons-lang3:3.4'
+}
