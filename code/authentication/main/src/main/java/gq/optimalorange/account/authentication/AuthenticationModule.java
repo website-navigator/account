@@ -8,12 +8,19 @@ import dagger.Module;
 import dagger.Provides;
 import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.authentication.spi.AuthenticationSpi;
+import gq.optimalorange.account.internalapi.InternalAuthenticationService;
 
 @Module
 public class AuthenticationModule {
 
   @Provides
   static AuthenticationService provideAuthenticationService(MultipleTypeAuthenticationService s) {
+    return s;
+  }
+
+  @Provides
+  static InternalAuthenticationService provideInternalAuthenticationService(
+      MultipleTypeAuthenticationService s) {
     return s;
   }
 

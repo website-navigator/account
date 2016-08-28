@@ -10,11 +10,13 @@ import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
+import gq.optimalorange.account.internalapi.InternalAuthenticationService;
 import gq.optimalorange.account.internalapi.Results;
 import rx.Single;
 
 @Singleton
-public class MultipleTypeAuthenticationService implements AuthenticationService {
+public class MultipleTypeAuthenticationService
+    implements AuthenticationService, InternalAuthenticationService {
 
   private final AuthenticationServiceRegister serviceRegister;
 
@@ -25,6 +27,12 @@ public class MultipleTypeAuthenticationService implements AuthenticationService 
 
   @Override
   public Single<Result<List<String>, Void>> getSupportedCertificateTypes() {
+    throw new UnsupportedOperationException(); //TODO
+  }
+
+  @Override
+  public Single<Result<Void, AddInitialCertificateFailure>> addInitialCertificate(
+      @Nonnull Identifier identifier, @Nonnull Certificate initialCertificate) {
     throw new UnsupportedOperationException(); //TODO
   }
 
