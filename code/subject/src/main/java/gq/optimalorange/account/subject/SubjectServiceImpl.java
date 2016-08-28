@@ -70,6 +70,7 @@ public class SubjectServiceImpl implements SubjectService {
         .cache();
     // [add failed][NOT_SUPPORTED_CERTIFICATE_TYPE] return NOT_SUPPORTED_CERTIFICATE_TYPE
     // because we have check it at 0., shouldn't goto here. so TODO log this error to admin now
+    // TODO maybe this cert type is removed after check at 0., so we should undo create here
     final Observable<Result<Identifier, CreateFailure>> unknownCertType = addInitCert
         .filter(result -> result.b.failed())
         .filter(r -> r.b.cause() == AddInitialCertificateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE)
