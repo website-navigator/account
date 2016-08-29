@@ -337,10 +337,4 @@ public class MemoryDatabase implements Database {
     }
   }
 
-  enum Failure {
-    SUBJECT_NOT_EXIST,
-    ALREADY_EXIST,
-    NOT_EXIST
-  }
-
 }
