@@ -4,8 +4,9 @@ import javax.annotation.Nonnull;
 
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.SubjectService.ExistFailureCause;
-import gq.optimalorange.account.SubjectService.GetIdentifierFailureCause;
+import gq.optimalorange.account.SubjectService.ExistFailure;
+import gq.optimalorange.account.SubjectService.GetIdentifierFailure;
+import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
 import okio.ByteString;
 import rx.Single;
 
@@ -16,11 +17,15 @@ public interface SubjectStorageService extends StorageService {
    */
   Single<Result<Identifier, Void>> create();
 
-  Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier);
+  Single<Result<Void, ExistFailure>> exist(@Nonnull Identifier identifier);
 
-  Single<Result<Identifier, GetIdentifierFailureCause>> getId(@Nonnull Identifier identifier);
+  Single<Result<Void, SetIdentifierFailure>> setIdentifier(
+      @Nonnull Identifier who,
+      @Nonnull Identifier newIdentifier);
 
-  Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(@Nonnull Identifier identifier);
+  Single<Result<Identifier, GetIdentifierFailure>> getIdentifier(
+      @Nonnull Identifier identifier,
+      @Nonnull String type);
 
   Single<Result<Void, AddValueFailure>> saveValue(
       @Nonnull Identifier identifier,

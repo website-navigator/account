@@ -6,8 +6,9 @@ import javax.inject.Singleton;
 
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.SubjectService.ExistFailureCause;
-import gq.optimalorange.account.SubjectService.GetIdentifierFailureCause;
+import gq.optimalorange.account.SubjectService.ExistFailure;
+import gq.optimalorange.account.SubjectService.GetIdentifierFailure;
+import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
 import gq.optimalorange.account.internalapi.Results;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
 import okio.ByteString;
@@ -18,7 +19,7 @@ import rx.SingleSubscriber;
 @Singleton
 public class MemorySubjectStorageService implements SubjectStorageService {
 
-  private final MemoryDatabase database;
+  private final Database database;
 
   @Inject
   public MemorySubjectStorageService(MemoryDatabase database) {
@@ -29,27 +30,39 @@ public class MemorySubjectStorageService implements SubjectStorageService {
   public Single<Result<Identifier, Void>> create() {
     return Single.create(subscriber -> {
       if (!subscriber.isUnsubscribed()) {
-        final Result<Identifier, Void> succeed = Results.succeed(Identifier.id(database.create()));
+        final Result<Identifier, Void> succeed = Results.succeed(database.create());
         subscriber.onSuccess(succeed);
       }
     });
   }
 
   @Override
-  public Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier) {
-    throw new UnsupportedOperationException();
+  public Single<Result<Void, ExistFailure>> exist(@Nonnull Identifier identifier) {
+    return Single.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        subscriber.onSuccess(database.exist(identifier));
+      }
+    });
   }
 
   @Override
-  public Single<Result<Identifier, GetIdentifierFailureCause>> getId(
-      @Nonnull Identifier identifier) {
-    throw new UnsupportedOperationException();
+  public Single<Result<Void, SetIdentifierFailure>> setIdentifier(
+      @Nonnull Identifier who, @Nonnull Identifier newIdentifier) {
+    return Single.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        subscriber.onSuccess(database.setIdentifier(who, newIdentifier));
+      }
+    });
   }
 
   @Override
-  public Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(
-      @Nonnull Identifier identifier) {
-    throw new UnsupportedOperationException();
+  public Single<Result<Identifier, GetIdentifierFailure>> getIdentifier(
+      @Nonnull Identifier identifier, @Nonnull String type) {
+    return Single.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        subscriber.onSuccess(database.getIdentifier(identifier, type));
+      }
+    });
   }
 
   @Override

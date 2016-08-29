@@ -16,19 +16,33 @@ public interface SubjectService extends Service {
     NOT_SUPPORTED_CERTIFICATE_TYPE
   }
 
-  Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier);
+  Single<Result<Void, ExistFailure>> exist(@Nonnull Identifier identifier);
 
-  enum ExistFailureCause {
-    NOT_SUPPORTED_IDENTIFIER_TYPE
+  enum ExistFailure {
+    UNSUPPORTED_IDENTIFIER_TYPE,
+    NOT_EXIST
   }
 
-  Single<Result<Identifier, GetIdentifierFailureCause>> getId(@Nonnull Identifier identifier);
+  Single<Result<Void, SetIdentifierFailure>> setIdentifier(
+      @Nonnull Identifier who,
+      @Nonnull Identifier newIdentifier);
 
-  Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(@Nonnull Identifier identifier);
+  enum SetIdentifierFailure {
+    UNSUPPORTED_LOCATING_IDENTIFIER_TYPE,
+    SUBJECT_NOT_EXIST,
+    TYPE_OF_NEW_IDENTIFIER_UNSUPPORTED,
+    UNSUPPORTED_MODIFICATION
+  }
 
-  enum GetIdentifierFailureCause {
-    NOT_EXIST,
-    NOT_SUPPORTED_IDENTIFIER_TYPE
+  Single<Result<Identifier, GetIdentifierFailure>> getIdentifier(
+      @Nonnull Identifier identifier,
+      @Nonnull String type);
+
+  enum GetIdentifierFailure {
+    UNSUPPORTED_LOCATING_IDENTIFIER_TYPE,
+    SUBJECT_NOT_EXIST,
+    TYPE_OF_FINDING_IDENTIFIER_UNSUPPORTED,
+    FINDING_IDENTIFIER_NOT_EXIST
   }
 
 }

@@ -85,20 +85,20 @@ public class SubjectServiceImpl implements SubjectService {
   }
 
   @Override
-  public Single<Result<Boolean, ExistFailureCause>> exist(@Nonnull Identifier identifier) {
+  public Single<Result<Void, ExistFailure>> exist(@Nonnull Identifier identifier) {
     return storageService.exist(identifier);
   }
 
   @Override
-  public Single<Result<Identifier, GetIdentifierFailureCause>> getId(
-      @Nonnull Identifier identifier) {
-    return storageService.getId(identifier);
+  public Single<Result<Void, SetIdentifierFailure>> setIdentifier(
+      @Nonnull Identifier who, @Nonnull Identifier newIdentifier) {
+    return storageService.setIdentifier(who, newIdentifier);
   }
 
   @Override
-  public Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(
-      @Nonnull Identifier identifier) {
-    return storageService.getUserName(identifier);
+  public Single<Result<Identifier, GetIdentifierFailure>> getIdentifier(
+      @Nonnull Identifier identifier, @Nonnull String type) {
+    return storageService.getIdentifier(identifier, type);
   }
 
 }

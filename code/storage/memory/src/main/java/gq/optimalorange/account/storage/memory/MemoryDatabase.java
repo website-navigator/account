@@ -13,6 +13,9 @@ import javax.inject.Inject;
 
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
+import gq.optimalorange.account.SubjectService.ExistFailure;
+import gq.optimalorange.account.SubjectService.GetIdentifierFailure;
+import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
 import gq.optimalorange.account.internalapi.Results;
 import okio.ByteString;
 
