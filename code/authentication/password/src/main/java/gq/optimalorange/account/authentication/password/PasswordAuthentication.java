@@ -4,9 +4,10 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import gq.optimalorange.account.AuthenticationService;
+import gq.optimalorange.account.AuthenticationService.AddCertificateFailureCause;
 import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
 import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailureCause;
+import gq.optimalorange.account.AuthenticationService.RemoveCertificateFailureCause;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
@@ -39,54 +40,76 @@ public class PasswordAuthentication implements AuthenticationSpi {
   }
 
   @Override
-  public Single<Result<Void, AuthenticationService.AddCertificateFailureCause>> addCertificate(
+  public Single<Result<Void, AddCertificateFailureCause>> addCertificate(
       @Nonnull Identifier identifier, @Nonnull Certificate newCertificate) {
-    // * haven't set
-    // * do set
-    /*storageService.retrieveValue(identifier, NAMESPACE, KEY)
-        .map(retrieve->{
-          if
-        })*/
-    /*return storageService
-        .saveValue(identifier, NAMESPACE, KEY, ByteString.encodeUtf8(newCertificate.getType()))
-        .map(saveResult->{
-          if (saveResult.succeeded()) {
+    return storageService
+        .saveValue(identifier, NAMESPACE, KEY, newCertificate.getValue())
+        .map(result -> {
+          if (result.succeeded()) {
             return Results.succeed(null);
           } else {
-            return Results.fail(AuthenticationService.AddCertificateFailureCause.SUBJECT_NOT_EXIST);
+            switch (result.cause()) {
+              case UNSUPPORTED_IDENTIFIER_TYPE:
+                return Results.fail(AddCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+              case SUBJECT_NOT_EXIST:
+                return Results.fail(AddCertificateFailureCause.SUBJECT_NOT_EXIST);
+              case ALREADY_EXIST:
+                return Results.fail(AddCertificateFailureCause.ALREADY_EXIST);
+              default:
+                throw new UnsupportedOperationException(
+                    "unsupported add value failed cause:" + result.cause());
+            }
           }
-        });*/
-    throw new UnsupportedOperationException(); // TODO
+        });
   }
 
   @Override
-  public Single<Result<Void, AuthenticationService.RemoveCertificateFailureCause>> removeCertificate(
+  public Single<Result<Void, RemoveCertificateFailureCause>> removeCertificate(
       @Nonnull Identifier identifier, @Nonnull Certificate toBeRemoved) {
-    throw new UnsupportedOperationException(); // TODO
+    return storageService
+        .deleteValue(identifier, NAMESPACE, KEY)
+        .map(result -> {
+          if (result.succeeded()) {
+            return Results.succeed(null);
+          } else {
+            switch (result.cause()) {
+              case UNSUPPORTED_IDENTIFIER_TYPE:
+                return Results.fail(RemoveCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+              case SUBJECT_NOT_EXIST:
+                return Results.fail(RemoveCertificateFailureCause.SUBJECT_NOT_EXIST);
+              case NOT_EXIST:
+                return Results.fail(RemoveCertificateFailureCause.CERTIFICATE_NOT_EXIST);
+              default:
+                throw new UnsupportedOperationException(
+                    "unsupported add value failed cause:" + result.cause());
+            }
+          }
+        });
   }
 
   @Override
   public Single<Result<Void, ChangeCertificateFailureCause>> changeCertificate(
       @Nonnull Identifier identifier, @Nonnull Certificate oldCertificate,
       @Nonnull Certificate newCertificate) {
-    final Observable<Result<Void, FailureCause>> change =
-        storageService.changeValue(identifier, NAMESPACE, KEY, newCertificate.getValue())
-            .toObservable().share();
-
-    final Observable<Result<Void, ChangeCertificateFailureCause>> succeeded =
-        change.filter(Result::succeeded).map(value -> Results.succeed(null));
-
-    final Observable<Result<Void, ChangeCertificateFailureCause>> noSubject =
-        change
-            .filter(value -> value.failed() && value.cause() == FailureCause.SUBJECT_NOT_EXIST)
-            .map(value -> Results.fail(ChangeCertificateFailureCause.SUBJECT_NOT_EXIST));
-
-    final Observable<Result<Void, ChangeCertificateFailureCause>> notExist =
-        change
-            .filter(value -> value.failed() && value.cause() == FailureCause.NOT_EXIST)
-            .map(value -> Results.fail(ChangeCertificateFailureCause.NOT_EXIST));
-
-    return Observable.merge(succeeded, noSubject, notExist).toSingle();
+    return storageService
+        .changeValue(identifier, NAMESPACE, KEY, newCertificate.getValue())
+        .map(result -> {
+          if (result.succeeded()) {
+            return Results.succeed(null);
+          } else {
+            switch (result.cause()) {
+              case UNSUPPORTED_IDENTIFIER_TYPE:
+                return Results.fail(ChangeCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+              case SUBJECT_NOT_EXIST:
+                return Results.fail(ChangeCertificateFailureCause.SUBJECT_NOT_EXIST);
+              case NOT_EXIST:
+                return Results.fail(ChangeCertificateFailureCause.CERTIFICATE_NOT_EXIST);
+              default:
+                throw new UnsupportedOperationException(
+                    "unsupported add value failed cause:" + result.cause());
+            }
+          }
+        });
   }
 
   @Override
@@ -114,15 +137,23 @@ public class PasswordAuthentication implements AuthenticationSpi {
           }
         });
 
-    final Observable<Result<Void, AuthenticateFailureCause>> noSubject = retrieve
-        .filter(value -> value.failed() && value.cause() == FailureCause.SUBJECT_NOT_EXIST)
-        .map(value -> Results.fail(AuthenticateFailureCause.SUBJECT_NOT_EXIST));
+    final Observable<Result<Void, AuthenticateFailureCause>> retrieveFailed = retrieve
+        .filter(Result::failed)
+        .map(result -> {
+          switch (result.cause()) {
+            case UNSUPPORTED_IDENTIFIER_TYPE:
+              return Results.fail(AuthenticateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+            case SUBJECT_NOT_EXIST:
+              return Results.fail(AuthenticateFailureCause.SUBJECT_NOT_EXIST);
+            case NOT_EXIST:
+              return Results.fail(AuthenticateFailureCause.CERTIFICATE_NOT_EXIST);
+            default:
+              throw new UnsupportedOperationException(
+                  "unsupported add value failed cause:" + result.cause());
+          }
+        });
 
-    final Observable<Result<Void, AuthenticateFailureCause>> notExist = retrieve
-        .filter(value -> value.failed() && value.cause() == FailureCause.NOT_EXIST)
-        .map(value -> Results.fail(AuthenticateFailureCause.WRONG_CERTIFICATE));
-
-    return Observable.merge(compared, noSubject, notExist).toSingle();
+    return Observable.merge(compared, retrieveFailed).toSingle();
   }
 
 }

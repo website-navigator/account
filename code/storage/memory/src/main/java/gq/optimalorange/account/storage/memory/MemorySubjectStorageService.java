@@ -53,7 +53,7 @@ public class MemorySubjectStorageService implements SubjectStorageService {
   }
 
   @Override
-  public Single<Result<Void, FailureCause>> saveValue(
+  public Single<Result<Void, AddValueFailure>> saveValue(
       @Nonnull Identifier identifier, @Nonnull String nameSpace, @Nonnull String key,
       @Nonnull ByteString value) {
     throw new UnsupportedOperationException();

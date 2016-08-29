@@ -16,6 +16,7 @@ public interface AuthenticationService extends Service {
       @Nonnull Certificate newCertificate);
 
   enum AddCertificateFailureCause {
+    UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     WRONG_CERTIFICATE,
     ALREADY_EXIST,
@@ -28,9 +29,11 @@ public interface AuthenticationService extends Service {
       @Nonnull Certificate toBeRemoved);
 
   enum RemoveCertificateFailureCause {
+    UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     WRONG_CERTIFICATE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    CERTIFICATE_NOT_EXIST
   }
 
   Single<Result<Void, ChangeCertificateFailureCause>> changeCertificate(
@@ -40,8 +43,9 @@ public interface AuthenticationService extends Service {
       @Nonnull Certificate newCertificate);
 
   enum ChangeCertificateFailureCause {
+    UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
-    NOT_EXIST,
+    CERTIFICATE_NOT_EXIST,
     WRONG_CERTIFICATE,
     NOT_SUPPORTED_CERTIFICATE_TYPE,
     NOT_SAME_CERTIFICATE_TYPE
@@ -51,9 +55,11 @@ public interface AuthenticationService extends Service {
       @Nonnull Identifier identifier, @Nonnull Certificate certificate);
 
   enum AuthenticateFailureCause {
+    UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     WRONG_CERTIFICATE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    CERTIFICATE_NOT_EXIST
   }
 
 }

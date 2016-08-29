@@ -22,11 +22,17 @@ public interface SubjectStorageService extends StorageService {
 
   Single<Result<Identifier, GetIdentifierFailureCause>> getUserName(@Nonnull Identifier identifier);
 
-  Single<Result<Void, FailureCause>> saveValue(
+  Single<Result<Void, AddValueFailure>> saveValue(
       @Nonnull Identifier identifier,
       @Nonnull String nameSpace,
       @Nonnull String key,
       @Nonnull ByteString value);
+
+  enum AddValueFailure {
+    UNSUPPORTED_IDENTIFIER_TYPE,
+    SUBJECT_NOT_EXIST,
+    ALREADY_EXIST
+  }
 
   Single<Result<Void, FailureCause>> deleteValue(
       @Nonnull Identifier identifier,
