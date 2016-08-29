@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
 import gq.optimalorange.account.Result;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
-import gq.optimalorange.account.internalapi.SubjectStorageService.FailureCause;
+import gq.optimalorange.account.internalapi.SubjectStorageService.GetValueFailure;
 import okio.ByteString;
 import rx.Single;
 import rx.observers.TestSubscriber;
@@ -43,10 +43,10 @@ public class PasswordAuthenticationTest {
   @Test
   public void testAuthenticateRetrieveValueOnce() {
     // given
-    final Result<ByteString, FailureCause> passwordResult = succeed(encodeUtf8("test").sha256());
+    final Result<ByteString, GetValueFailure> passwordResult = succeed(encodeUtf8("test").sha256());
 
     AtomicLong subscribeCounter = new AtomicLong(0);
-    Single<Result<ByteString, FailureCause>> value = Single.create(subscriber -> {
+    Single<Result<ByteString, GetValueFailure>> value = Single.create(subscriber -> {
       subscribeCounter.incrementAndGet();
       subscriber.onSuccess(passwordResult);
     });

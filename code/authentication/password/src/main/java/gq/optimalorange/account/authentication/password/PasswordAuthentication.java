@@ -14,7 +14,7 @@ import gq.optimalorange.account.Result;
 import gq.optimalorange.account.authentication.spi.AuthenticationSpi;
 import gq.optimalorange.account.internalapi.Results;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
-import gq.optimalorange.account.internalapi.SubjectStorageService.FailureCause;
+import gq.optimalorange.account.internalapi.SubjectStorageService.GetValueFailure;
 import okio.ByteString;
 import rx.Observable;
 import rx.Single;
@@ -117,7 +117,7 @@ public class PasswordAuthentication implements AuthenticationSpi {
       @Nonnull Identifier identifier, @Nonnull Certificate certificate) {
     // * read password
     // * compare password
-    final Observable<Result<ByteString, FailureCause>> retrieve =
+    final Observable<Result<ByteString, GetValueFailure>> retrieve =
         storageService.retrieveValue(identifier, NAMESPACE, KEY) // read
             .toObservable()
             .cacheWithInitialCapacity(1);

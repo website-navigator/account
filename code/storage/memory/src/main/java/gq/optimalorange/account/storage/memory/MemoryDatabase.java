@@ -17,6 +17,10 @@ import gq.optimalorange.account.SubjectService.ExistFailure;
 import gq.optimalorange.account.SubjectService.GetIdentifierFailure;
 import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
 import gq.optimalorange.account.internalapi.Results;
+import gq.optimalorange.account.internalapi.SubjectStorageService.AddValueFailure;
+import gq.optimalorange.account.internalapi.SubjectStorageService.ChangeValueFailure;
+import gq.optimalorange.account.internalapi.SubjectStorageService.DeleteValueFailure;
+import gq.optimalorange.account.internalapi.SubjectStorageService.GetValueFailure;
 import okio.ByteString;
 
 @NotThreadSafe

@@ -39,24 +39,36 @@ public interface SubjectStorageService extends StorageService {
     ALREADY_EXIST
   }
 
-  Single<Result<Void, FailureCause>> deleteValue(
+  Single<Result<Void, DeleteValueFailure>> deleteValue(
       @Nonnull Identifier identifier,
       @Nonnull String nameSpace,
       @Nonnull String key);
 
-  Single<Result<Void, FailureCause>> changeValue(
+  enum DeleteValueFailure {
+    UNSUPPORTED_IDENTIFIER_TYPE,
+    SUBJECT_NOT_EXIST,
+    NOT_EXIST
+  }
+
+  Single<Result<Void, ChangeValueFailure>> changeValue(
       @Nonnull Identifier identifier,
       @Nonnull String nameSpace,
       @Nonnull String key,
       @Nonnull ByteString value
   );
 
-  Single<Result<ByteString, FailureCause>> retrieveValue(
+  enum ChangeValueFailure {
+    UNSUPPORTED_IDENTIFIER_TYPE,
+    SUBJECT_NOT_EXIST,
+    NOT_EXIST
+  }
+
+  Single<Result<ByteString, GetValueFailure>> retrieveValue(
       @Nonnull Identifier identifier,
       @Nonnull String nameSpace,
       @Nonnull String key);
 
-  enum FailureCause {
+  enum GetValueFailure {
     UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     NOT_EXIST
