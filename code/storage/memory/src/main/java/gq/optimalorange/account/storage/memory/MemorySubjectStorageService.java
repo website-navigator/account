@@ -13,7 +13,6 @@ import gq.optimalorange.account.internalapi.Results;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
 import okio.ByteString;
 import rx.Single;
-import rx.SingleSubscriber;
 
 //TODO thread
 @Singleton
@@ -69,109 +68,51 @@ public class MemorySubjectStorageService implements SubjectStorageService {
   public Single<Result<Void, AddValueFailure>> saveValue(
       @Nonnull Identifier identifier, @Nonnull String nameSpace, @Nonnull String key,
       @Nonnull ByteString value) {
-    throw new UnsupportedOperationException();
+    return Single.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        AddValueFailure addValueFailure = database.addValue(identifier, nameSpace, key, value);
+        subscriber.onSuccess(addValueFailure == null ?
+                             Results.<Void, AddValueFailure>succeed(null) :
+                             Results.<Void, AddValueFailure>fail(addValueFailure));
+      }
+    });
   }
 
   @Override
-  public Single<Result<Void, FailureCause>> deleteValue(
+  public Single<Result<Void, DeleteValueFailure>> deleteValue(
       @Nonnull Identifier identifier, @Nonnull String nameSpace, @Nonnull String key) {
-    throw new UnsupportedOperationException();
+    return Single.create(subscriber -> {
+      if (!subscriber.isUnsubscribed()) {
+        final DeleteValueFailure delFailure = database.deleteValue(identifier, nameSpace, key);
+        subscriber.onSuccess(delFailure == null ?
+                             Results.<Void, DeleteValueFailure>succeed(null) :
+                             Results.<Void, DeleteValueFailure>fail(delFailure));
+      }
+    });
   }
 
   @Override
-  public Single<Result<Void, FailureCause>> changeValue(
+  public Single<Result<Void, ChangeValueFailure>> changeValue(
       @Nonnull Identifier identifier, @Nonnull String nameSpace, @Nonnull String key,
       @Nonnull ByteString value) {
     return Single.create(subscriber -> {
       if (!subscriber.isUnsubscribed()) {
-        if (Identifier.TYPE_ID.equals(identifier.getType())) {
-          doChangeValue(subscriber, identifier.getValue(), nameSpace, key, value);
-        } else if (Identifier.TYPE_USERNAME.equals(identifier.getType())) {
-          doChangeValue(subscriber, database.getId(identifier.getValue()), nameSpace, key, value);
-        } else {
-          final Result<Void, FailureCause> fail =
-              Results.fail(FailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
-          subscriber.onSuccess(fail);
-        }
+        ChangeValueFailure changeFailure = database.changeValue(identifier, nameSpace, key, value);
+        subscriber.onSuccess(changeFailure == null ?
+                             Results.<Void, ChangeValueFailure>succeed(null) :
+                             Results.<Void, ChangeValueFailure>fail(changeFailure));
       }
     });
-  }
-
-  private void doChangeValue(
-      SingleSubscriber<? super Result<Void, FailureCause>> subscriber,
-      String id, String nameSpace, String key, ByteString value) {
-    // do operation
-    final MemoryDatabase.Failure failure = database.changeValueWithId(id, nameSpace, key, value);
-    // emit result
-    if (failure == null) {
-      final Result<Void, FailureCause> succeed = Results.succeed(null);
-      subscriber.onSuccess(succeed);
-    } else {
-      switch (failure) {
-        case SUBJECT_NOT_EXIST: {
-          final Result<Void, FailureCause> fail = Results.fail(FailureCause.SUBJECT_NOT_EXIST);
-          subscriber.onSuccess(fail);
-          break;
-        }
-        case NOT_EXIST: {
-          final Result<Void, FailureCause> fail = Results.fail(FailureCause.NOT_EXIST);
-          subscriber.onSuccess(fail);
-          break;
-        }
-        case ALREADY_EXIST:
-          throw new AssertionError();
-        default:
-          throw new UnsupportedOperationException();
-      }
-    }
   }
 
   @Override
-  public Single<Result<ByteString, FailureCause>> retrieveValue(
+  public Single<Result<ByteString, GetValueFailure>> retrieveValue(
       @Nonnull Identifier identifier, @Nonnull String nameSpace, @Nonnull String key) {
     return Single.create(subscriber -> {
       if (!subscriber.isUnsubscribed()) {
-        if (Identifier.TYPE_ID.equals(identifier.getType())) {
-          doRetrieveValue(subscriber, identifier.getValue(), nameSpace, key);
-        } else if (Identifier.TYPE_USERNAME.equals(identifier.getType())) {
-          doRetrieveValue(subscriber, database.getId(identifier.getValue()), nameSpace, key);
-        } else {
-          final Result<ByteString, FailureCause> fail =
-              Results.fail(FailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
-          subscriber.onSuccess(fail);
-        }
+        subscriber.onSuccess(database.getValue(identifier, nameSpace, key));
       }
     });
-  }
-
-  private void doRetrieveValue(
-      SingleSubscriber<? super Result<ByteString, FailureCause>> subscriber,
-      String id, String nameSpace, String key) {
-    // do operation
-    final Result<ByteString, MemoryDatabase.Failure> result =
-        database.getValueWithId(id, nameSpace, key);
-    // emit result
-    if (result.succeeded()) {
-      final Result<ByteString, FailureCause> succeed = Results.succeed(result.result());
-      subscriber.onSuccess(succeed);
-    } else {
-      switch (result.cause()) {
-        case SUBJECT_NOT_EXIST: {
-          final Result<ByteString, FailureCause> f = Results.fail(FailureCause.SUBJECT_NOT_EXIST);
-          subscriber.onSuccess(f);
-          break;
-        }
-        case NOT_EXIST: {
-          final Result<ByteString, FailureCause> fail = Results.fail(FailureCause.NOT_EXIST);
-          subscriber.onSuccess(fail);
-          break;
-        }
-        case ALREADY_EXIST:
-          throw new AssertionError();
-        default:
-          throw new UnsupportedOperationException();
-      }
-    }
   }
 
 }
