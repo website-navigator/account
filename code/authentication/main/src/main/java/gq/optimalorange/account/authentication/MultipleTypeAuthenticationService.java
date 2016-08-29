@@ -73,18 +73,21 @@ public class MultipleTypeAuthenticationService
     //* 1. authenticate
     final Observable<Result<Void, AuthenticateFailureCause>> auth =
         authenticate(identifier, forAuthenticate).toObservable().cache();
-    // [auth failed][SUBJECT_NOT_EXIST] return SUBJECT_NOT_EXIST
-    // [auth failed][WRONG_CERTIFICATE] return WRONG_CERTIFICATE
-    // [auth failed][NOT_SUPPORTED_CERTIFICATE_TYPE] return NOT_SUPPORTED_CERTIFICATE_TYPE
+    // [auth failed]
     final Observable<Result<Void, AddCertificateFailureCause>> authFailed =
         auth.filter(Result::failed).map(r -> {
           switch (r.cause()) {
+            case UNSUPPORTED_IDENTIFIER_TYPE:
+              return Results.fail(AddCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
             case SUBJECT_NOT_EXIST:
               return Results.fail(AddCertificateFailureCause.SUBJECT_NOT_EXIST);
+            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+              return Results
+                  .fail(AddCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+            case CERTIFICATE_NOT_EXIST:
+              return Results.fail(AddCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
             case WRONG_CERTIFICATE:
               return Results.fail(AddCertificateFailureCause.WRONG_CERTIFICATE);
-            case NOT_SUPPORTED_CERTIFICATE_TYPE:
-              return Results.fail(AddCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
             default:
               throw new UnsupportedOperationException("unsupported auth fail cause: " + r.cause());
           }
@@ -105,8 +108,7 @@ public class MultipleTypeAuthenticationService
     final Observable<Result<Void, AddCertificateFailureCause>> addCert = spi
         .filter(Result::succeeded)
         .flatMap(r -> r.result().addCertificate(identifier, newCertificate).toObservable());
-    // [addCertificate failed][SUBJECT_NOT_EXIST] return SUBJECT_NOT_EXIST
-    // [addCertificate failed][ALREADY_EXIST] return ALREADY_EXIST
+    // [addCertificate failed] return this cause
     // [addCertificate succeeded] return succeeded
     return Observable.merge(authFailed, unsupportedCertType, addCert).toSingle();
   }
@@ -122,18 +124,21 @@ public class MultipleTypeAuthenticationService
     //* 1. authenticate
     final Observable<Result<Void, AuthenticateFailureCause>> auth =
         authenticate(identifier, forAuthenticate).toObservable().cache();
-    // [auth failed][SUBJECT_NOT_EXIST] return SUBJECT_NOT_EXIST
-    // [auth failed][WRONG_CERTIFICATE] return WRONG_CERTIFICATE
-    // [auth failed][NOT_SUPPORTED_CERTIFICATE_TYPE] return NOT_SUPPORTED_CERTIFICATE_TYPE
+    // [auth failed]
     final Observable<Result<Void, RemoveCertificateFailureCause>> authFailed =
         auth.filter(Result::failed).map(r -> {
           switch (r.cause()) {
+            case UNSUPPORTED_IDENTIFIER_TYPE:
+              return Results.fail(RemoveCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
             case SUBJECT_NOT_EXIST:
               return Results.fail(RemoveCertificateFailureCause.SUBJECT_NOT_EXIST);
+            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+              return Results
+                  .fail(RemoveCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+            case CERTIFICATE_NOT_EXIST:
+              return Results.fail(RemoveCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
             case WRONG_CERTIFICATE:
               return Results.fail(RemoveCertificateFailureCause.WRONG_CERTIFICATE);
-            case NOT_SUPPORTED_CERTIFICATE_TYPE:
-              return Results.fail(RemoveCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
             default:
               throw new UnsupportedOperationException("unsupported auth fail cause: " + r.cause());
           }
@@ -154,8 +159,7 @@ public class MultipleTypeAuthenticationService
     final Observable<Result<Void, RemoveCertificateFailureCause>> removeCert = spi
         .filter(Result::succeeded)
         .flatMap(r -> r.result().removeCertificate(identifier, toBeRemoved).toObservable());
-    // [addCertificate failed][SUBJECT_NOT_EXIST] return SUBJECT_NOT_EXIST
-    // [addCertificate failed][ALREADY_EXIST] return ALREADY_EXIST
+    // [addCertificate failed] return this cause
     // [addCertificate succeeded] return succeeded
     return Observable.merge(authFailed, unsupportedCertType, removeCert).toSingle();
   }

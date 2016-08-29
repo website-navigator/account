@@ -91,14 +91,20 @@ public class ChangeCertificateOnSubscribe
 
     private void onAuthenticateFailed(AuthenticateFailureCause cause) {
       switch (cause) {
+        case UNSUPPORTED_IDENTIFIER_TYPE:
+          fail(actual, ChangeCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+          break;
         case SUBJECT_NOT_EXIST:
           fail(actual, ChangeCertificateFailureCause.SUBJECT_NOT_EXIST);
           break;
+        case NOT_SUPPORTED_CERTIFICATE_TYPE:
+          fail(actual, ChangeCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+          break;
+        case CERTIFICATE_NOT_EXIST:
+          fail(actual, ChangeCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
+          break;
         case WRONG_CERTIFICATE:
           fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
-          break;
-        case NOT_SUPPORTED_CERTIFICATE_TYPE:
-          fail(actual, ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
           break;
         default:
           fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
