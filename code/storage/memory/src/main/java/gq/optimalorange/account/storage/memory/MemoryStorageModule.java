@@ -8,8 +8,13 @@ import gq.optimalorange.account.internalapi.SubjectStorageService;
 public class MemoryStorageModule {
 
   @Provides
+  static Database provideDatabase(MemoryDatabase memoryDatabase) {
+    return memoryDatabase;
+  }
+
+  @Provides
   static SubjectStorageService provideSubjectStorageService(MemorySubjectStorageService service) {
-    return service;
+    return new SerializedSubjectStorageService(service);
   }
 
 }
