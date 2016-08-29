@@ -17,8 +17,14 @@ public class Identifier {
     return new Identifier(type, value);
   }
 
+  @Nonnull
   public static Identifier id(@Nonnull String id) {
     return create(TYPE_ID, id);
+  }
+
+  @Nonnull
+  public static Identifier username(@Nonnull String username) {
+    return create(TYPE_USERNAME, username);
   }
 
   private Identifier(@Nonnull String type, @Nonnull String value) {
