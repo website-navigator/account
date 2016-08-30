@@ -11,7 +11,6 @@ import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
 import gq.optimalorange.account.sample.inject.DaggerMainComponent;
 import gq.optimalorange.account.sample.inject.MainComponent;
 import gq.optimalorange.account.sample.utils.Debugger;
-import gq.optimalorange.account.subject.utils.Pair;
 import rx.Observable;
 
 import static gq.optimalorange.account.Certificate.password;
@@ -95,25 +94,21 @@ public class Main implements Runnable {
     }
   }
 
-  /*
-  1. create account
-  2. set user name
-  3. change password
-  4. authenticate
-  * */
   private Observable<Result<?, ? extends Enum<? extends Enum<?>>>> getUseCase() {
     final double suffix = Math.random() * 1_000_000;
-    final String initPassword = "init test password " + suffix;
     final String username = "test username " + suffix;
+    final String initPassword = "init test password " + suffix;
     final String changedPassword = "changed test password" + suffix;
-
+    // 1. create account
     final Observable<Result<Identifier, CreateFailure>> signUp =
         mainComponent.getSubjectService().create(password(initPassword)).toObservable().cache();
+    // 2. set user name
     final Observable<Result<Void, SetIdentifierFailure>> setUsername = signUp
         .filter(Result::succeeded)
         .flatMap(r -> mainComponent.getSubjectService()
-            .setIdentifier(r.result(), Identifier.username(username))
+            .setIdentifier(r.result(), password(initPassword), Identifier.username(username))
             .toObservable());
+    // 3. change password
     final Observable<Result<Void, ChangeCertificateFailureCause>> changePassword = signUp
         .filter(Result::succeeded)
         .flatMap(r -> mainComponent.getAuthenticationService()
@@ -121,22 +116,20 @@ public class Main implements Runnable {
                                password(initPassword), password(changedPassword))
             .toObservable())
         .cache();
+    // 4. authenticate
+    final Observable<Result<Void, AuthenticateFailureCause>> authenticate = changePassword
+        .map(r -> {
+          if (r.succeeded()) {
+            return changedPassword;
+          } else {
+            return initPassword;
+          }
+        })
+        .flatMap(r -> mainComponent.getAuthenticationService()
+            .authenticate(Identifier.username(username), password(r))
+            .toObservable());
 
-    final Observable<Result<Void, AuthenticateFailureCause>> authenticate =
-        changePassword
-            .map(r -> {
-              if (r.succeeded()) {
-                return changedPassword;
-              } else {
-                return initPassword;
-              }
-            })
-            .zipWith(signUp, Pair::new)
-            .flatMap(r -> mainComponent.getAuthenticationService()
-                .authenticate(r.b.result(), password(r.a))
-                .toObservable());
-
-    return Observable.merge(signUp, setUsername, changePassword, authenticate);
+    return Observable.concat(signUp, setUsername, changePassword, authenticate);
   }
 
   private static void println(Object x) {
