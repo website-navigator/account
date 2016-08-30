@@ -1,5 +1,6 @@
 package gq.optimalorange.account.storage.memory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
@@ -17,14 +18,22 @@ import rx.schedulers.Schedulers;
 @ThreadSafe
 public class SerializedSubjectStorageService implements SubjectStorageService {
 
-  private final Scheduler workerScheduler = Schedulers.from(Executors.newFixedThreadPool(
+  private final ExecutorService worker = Executors.newFixedThreadPool(
       1, new ThreadFactory("SerializedSubjectStorageServiceWorker-")
-  ));
+  );
+
+  private final Scheduler workerScheduler = Schedulers.from(worker);
 
   private final SubjectStorageService actual;
 
   public SerializedSubjectStorageService(SubjectStorageService actual) {
     this.actual = actual;
+  }
+
+  @Override
+  protected void finalize() throws Throwable {
+    worker.shutdown();
+    super.finalize();
   }
 
   private <R> Single<R> receiveRequest(Single<R> request) {
