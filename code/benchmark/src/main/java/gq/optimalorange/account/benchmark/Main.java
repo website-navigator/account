@@ -142,9 +142,8 @@ public class Main implements Runnable {
     final Observable<Result<Void, ChangeCertificateFailureCause>> changePassword = signUp
         .filter(Result::succeeded)
         .flatMap(r -> mainComponent.getAuthenticationService()
-            .changeCertificate( //TODO remove oldPassword parameter
-                                r.result(), password(initPassword), password(initPassword),
-                                password(changedPassword))
+            .changeCertificate(r.result(), password(initPassword),
+                               password(initPassword), password(changedPassword))
             .toObservable())
         .cache();
 
