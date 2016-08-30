@@ -25,11 +25,15 @@ public interface SubjectService extends Service {
 
   Single<Result<Void, SetIdentifierFailure>> setIdentifier(
       @Nonnull Identifier who,
+      @Nonnull Certificate forAuthenticate,
       @Nonnull Identifier newIdentifier);
 
   enum SetIdentifierFailure {
     UNSUPPORTED_LOCATING_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
+    UNSUPPORTED_CERTIFICATE_TYPE,
+    CERTIFICATE_NOT_EXIST,
+    WRONG_CERTIFICATE,
     TYPE_OF_NEW_IDENTIFIER_UNSUPPORTED,
     UNSUPPORTED_MODIFICATION
   }

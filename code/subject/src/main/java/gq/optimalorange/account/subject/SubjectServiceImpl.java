@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
@@ -91,8 +92,34 @@ public class SubjectServiceImpl implements SubjectService {
 
   @Override
   public Single<Result<Void, SetIdentifierFailure>> setIdentifier(
-      @Nonnull Identifier who, @Nonnull Identifier newIdentifier) {
-    return storageService.setIdentifier(who, newIdentifier);
+      @Nonnull Identifier who, @Nonnull Certificate forAuthenticate,
+      @Nonnull Identifier newIdentifier) {
+    // 1. authenticate
+    final Observable<Result<Void, AuthenticateFailureCause>> auth =
+        internalAuthenticationService.authenticate(who, forAuthenticate).toObservable().cache();
+    final Observable<Result<Void, SetIdentifierFailure>> authFailed =
+        auth.filter(Result::failed).map(r -> {
+          switch (r.cause()) {
+            case UNSUPPORTED_IDENTIFIER_TYPE:
+              return Results.fail(SetIdentifierFailure.UNSUPPORTED_LOCATING_IDENTIFIER_TYPE);
+            case SUBJECT_NOT_EXIST:
+              return Results.fail(SetIdentifierFailure.SUBJECT_NOT_EXIST);
+            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+              return Results.fail(SetIdentifierFailure.UNSUPPORTED_CERTIFICATE_TYPE);
+            case CERTIFICATE_NOT_EXIST:
+              return Results.fail(SetIdentifierFailure.CERTIFICATE_NOT_EXIST);
+            case WRONG_CERTIFICATE:
+              return Results.fail(SetIdentifierFailure.WRONG_CERTIFICATE);
+            default:
+              throw new UnsupportedOperationException("unsupported auth fail cause: " + r.cause());
+          }
+        });
+    // 2. setIdentifier
+    final Observable<Result<Void, SetIdentifierFailure>> setIdentifier = auth
+        .filter(Result::succeeded)
+        .flatMap(r -> storageService.setIdentifier(who, newIdentifier).toObservable());
+
+    return Observable.merge(authFailed, setIdentifier).toSingle();
   }
 
   @Override
