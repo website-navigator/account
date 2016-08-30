@@ -53,13 +53,17 @@ public class MultipleTypeAuthenticationService
             .filter(Result::succeeded)
             .flatMap(r -> r.result().addCertificate(identifier, initialCertificate).toObservable())
             .cache();
-    // [addCertificate failed] shouldn't failed so TODO log it
+    // [addCertificate failed] shouldn't failed so throw a exception
+    final Observable<Result<Void, AddInitialCertificateFailure>> addCertFailed =
+        addCert.filter(Result::failed).map(r -> {
+          throw new IllegalStateException(r.cause().toString());
+        });
 
     // [addCertificate succeeded] return succeeded
-    final Observable<Result<Void, AddInitialCertificateFailure>> succedded =
+    final Observable<Result<Void, AddInitialCertificateFailure>> succeeded =
         addCert.filter(Result::succeeded).map(r -> Results.succeed(null));
 
-    return Observable.merge(unsupportedCertType, succedded).toSingle();
+    return Observable.merge(unsupportedCertType, addCertFailed, succeeded).toSingle();
   }
 
   // 1. authenticate
