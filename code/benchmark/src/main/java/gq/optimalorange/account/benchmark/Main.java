@@ -2,21 +2,11 @@ package gq.optimalorange.account.benchmark;
 
 import org.apache.commons.lang3.time.StopWatch;
 
-import gq.optimalorange.account.AuthenticationService;
-import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
-import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailureCause;
-import gq.optimalorange.account.Identifier;
-import gq.optimalorange.account.Result;
-import gq.optimalorange.account.SubjectService.CreateFailure;
-import gq.optimalorange.account.SubjectService.SetIdentifierFailure;
-import gq.optimalorange.account.benchmark.inject.DaggerMainComponent;
-import gq.optimalorange.account.benchmark.inject.MainComponent;
-import gq.optimalorange.account.subject.utils.Pair;
+import gq.optimalorange.account.sample.Samples;
+import gq.optimalorange.account.sample.inject.DaggerServiceComponent;
+import gq.optimalorange.account.sample.inject.ServiceComponent;
 import rx.Completable;
-import rx.Observable;
 import rx.schedulers.Schedulers;
-
-import static gq.optimalorange.account.Certificate.password;
 
 public class Main implements Runnable {
 
@@ -55,11 +45,11 @@ public class Main implements Runnable {
 //  private static final int ROUNDS = 0x00_00_04;
 //  private static final int ROUNDS = 0x00_00_01;
 
-  private MainComponent mainComponent;
+  private ServiceComponent serviceComponent;
 
   @Override
   public void run() {
-    final Completable allTest = getAllTest(null);
+    final Completable allTest = getAllTest();
 
     StopWatch stopWatch = new StopWatch();
     System.out.println("start benchmark");
@@ -74,10 +64,10 @@ public class Main implements Runnable {
     System.out.println("testsuit/s: " + tsPerS);
   }
 
-  private Completable getAllTest(AuthenticationService authentication) {
+  private Completable getAllTest() {
     final Completable testSuitBatch = Completable.concat(
         getChangeMainComponentTask(),
-        getTestSuitBatch(authentication)/*,
+        getTestSuitBatch()/*,
         getCleanMainComponentTask()*/); // 如果 BATCH_SIZE 较小，运行本行
 
     Completable[] testSuitBatches = new Completable[ROUNDS];
@@ -89,21 +79,21 @@ public class Main implements Runnable {
 
   private Completable getChangeMainComponentTask() {
     return Completable.create(completableSubscriber -> {
-      mainComponent = DaggerMainComponent.create();
+      serviceComponent = DaggerServiceComponent.create();
       completableSubscriber.onCompleted();
     });
   }
 
   private Completable getCleanMainComponentTask() {
     return Completable.create(completableSubscriber -> {
-      mainComponent = null;
+      serviceComponent = null;
       System.gc();
       completableSubscriber.onCompleted();
     });
   }
 
-  private Completable getTestSuitBatch(AuthenticationService authentication) {
-    final Completable testSuit = getTestSuit(authentication);
+  private Completable getTestSuitBatch() {
+    final Completable testSuit = getTestSuit();
 
     Completable[] testSuits = new Completable[BATCH_SIZE];
     for (int i = 0; i < testSuits.length; i++) {
@@ -112,7 +102,7 @@ public class Main implements Runnable {
     return Completable.mergeDelayError(testSuits);
   }
 
-  private Completable getTestSuit(AuthenticationService authentication) {
+  private Completable getTestSuit() {
     return Completable.create(
         subscriber -> getUseCase()
             .subscribeOn(Schedulers.computation())
@@ -120,48 +110,8 @@ public class Main implements Runnable {
     );
   }
 
-  /*
-  1. create account
-  2. set user name
-  3. change password
-  4. authenticate
-  * */
   private Completable getUseCase() {
-    final double suffix = Math.random() * 1_000_000;
-    final String initPassword = "init test password " + suffix;
-    final String username = "test username " + suffix;
-    final String changedPassword = "changed test password" + suffix;
-
-    final Observable<Result<Identifier, CreateFailure>> signUp =
-        mainComponent.getSubjectService().create(password(initPassword)).toObservable().cache();
-    final Observable<Result<Void, SetIdentifierFailure>> setUsername = signUp
-        .filter(Result::succeeded)
-        .flatMap(r -> mainComponent.getSubjectService()
-            .setIdentifier(r.result(), Identifier.username(username))
-            .toObservable());
-    final Observable<Result<Void, ChangeCertificateFailureCause>> changePassword = signUp
-        .filter(Result::succeeded)
-        .flatMap(r -> mainComponent.getAuthenticationService()
-            .changeCertificate(r.result(), password(initPassword),
-                               password(initPassword), password(changedPassword))
-            .toObservable())
-        .cache();
-
-    final Observable<Result<Void, AuthenticateFailureCause>> authenticate =
-        changePassword
-            .map(r -> {
-              if (r.succeeded()) {
-                return changedPassword;
-              } else {
-                return initPassword;
-              }
-            })
-            .zipWith(signUp, Pair::new)
-            .flatMap(r -> mainComponent.getAuthenticationService()
-                .authenticate(r.b.result(), password(r.a))
-                .toObservable());
-
-    return Observable.merge(signUp, setUsername, changePassword, authenticate).toCompletable();
+    return Samples.getUseCase(serviceComponent).toCompletable();
   }
 
 

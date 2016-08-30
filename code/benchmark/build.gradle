@@ -12,5 +12,7 @@ dependencies {
   compile project(':authentication:password')
   compile project(':storage:memory')
 
+  compile project(':sample')
+
   compile 'org.apache.commons:commons-lang3:3.4'
 }
