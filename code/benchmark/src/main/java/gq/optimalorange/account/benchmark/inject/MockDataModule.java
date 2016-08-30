@@ -5,6 +5,8 @@ import dagger.Provides;
 import gq.optimalorange.account.storage.memory.MemoryDatabase;
 import okio.ByteString;
 
+import static gq.optimalorange.account.Identifier.id;
+
 @Module
 public class MockDataModule {
 
@@ -12,7 +14,7 @@ public class MockDataModule {
   static MemoryDatabase provideMemoryDatabase() {
     MemoryDatabase data = new MemoryDatabase();
     data.create();
-    data.saveValueWithId("1", "password", "password", ByteString.encodeUtf8("test").sha256());
+    data.addValue(id("1"), "password", "password", ByteString.encodeUtf8("test").sha256());
     return data;
   }
 
