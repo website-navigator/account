@@ -18,8 +18,8 @@ import rx.schedulers.Schedulers;
 @ThreadSafe
 public class SerializedSubjectStorageService implements SubjectStorageService {
 
-  private final ExecutorService worker = Executors.newFixedThreadPool(
-      1, new ThreadFactory("SerializedSubjectStorageServiceWorker-")
+  private final ExecutorService worker = Executors.newSingleThreadExecutor(
+      new ThreadFactory("SerializedSubjectStorageServiceWorker-")
   );
 
   private final Scheduler workerScheduler = Schedulers.from(worker);
