@@ -17,7 +17,7 @@ import gq.optimalorange.account.subject.SubjectModule;
     PasswordAuthenticationSpiModule.class,
     MemoryStorageModule.class
 })
-public interface MainComponent {
+public interface ServiceComponent {
 
   SubjectService getSubjectService();
 
