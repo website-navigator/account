@@ -10,60 +10,60 @@ public interface AuthenticationService extends Service {
 
   Single<Result<List<String>, Void>> getSupportedCertificateTypes();
 
-  Single<Result<Void, AddCertificateFailureCause>> addCertificate(
+  Single<Result<Void, AddCertificateFailure>> addCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate newCertificate);
 
-  enum AddCertificateFailureCause {
+  enum AddCertificateFailure {
     UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     AUTHENTICATE_CERTIFICATE_NOT_EXIST,
     UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE,
     WRONG_CERTIFICATE,
     ALREADY_EXIST,
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    UNSUPPORTED_CERTIFICATE_TYPE
   }
 
-  Single<Result<Void, RemoveCertificateFailureCause>> removeCertificate(
+  Single<Result<Void, RemoveCertificateFailure>> removeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate toBeRemoved);
 
-  enum RemoveCertificateFailureCause {
+  enum RemoveCertificateFailure {
     UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE,
     AUTHENTICATE_CERTIFICATE_NOT_EXIST,
     WRONG_CERTIFICATE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    UNSUPPORTED_CERTIFICATE_TYPE,
     CERTIFICATE_NOT_EXIST
   }
 
-  Single<Result<Void, ChangeCertificateFailureCause>> changeCertificate(
+  Single<Result<Void, ChangeCertificateFailure>> changeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate oldCertificate,
       @Nonnull Certificate newCertificate);
 
-  enum ChangeCertificateFailureCause {
+  enum ChangeCertificateFailure {
     UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
     UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE,
     AUTHENTICATE_CERTIFICATE_NOT_EXIST,
     WRONG_CERTIFICATE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    UNSUPPORTED_CERTIFICATE_TYPE,
     CERTIFICATE_NOT_EXIST,
     NOT_SAME_CERTIFICATE_TYPE
   }
 
-  Single<Result<Void, AuthenticateFailureCause>> authenticate(
+  Single<Result<Void, AuthenticateFailure>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate);
 
-  enum AuthenticateFailureCause {
+  enum AuthenticateFailure {
     UNSUPPORTED_IDENTIFIER_TYPE,
     SUBJECT_NOT_EXIST,
-    NOT_SUPPORTED_CERTIFICATE_TYPE,
+    UNSUPPORTED_CERTIFICATE_TYPE,
     CERTIFICATE_NOT_EXIST,
     WRONG_CERTIFICATE
   }

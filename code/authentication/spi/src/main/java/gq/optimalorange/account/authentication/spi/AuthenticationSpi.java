@@ -13,11 +13,11 @@ public interface AuthenticationSpi {
   @Nonnull
   String authenticationType();
 
-  Single<Result<Void, AuthenticationService.AddCertificateFailureCause>> addCertificate(
+  Single<Result<Void, AuthenticationService.AddCertificateFailure>> addCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate newCertificate);
 
-  Single<Result<Void, AuthenticationService.RemoveCertificateFailureCause>> removeCertificate(
+  Single<Result<Void, AuthenticationService.RemoveCertificateFailure>> removeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate toBeRemoved);
 
@@ -25,12 +25,12 @@ public interface AuthenticationSpi {
    * @throws IllegalArgumentException if type of oldCertificate and newCertificate isn't {@link
    *                                  #authenticationType()}
    */
-  Single<Result<Void, AuthenticationService.ChangeCertificateFailureCause>> changeCertificate(
+  Single<Result<Void, AuthenticationService.ChangeCertificateFailure>> changeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate oldCertificate,
       @Nonnull Certificate newCertificate);
 
-  Single<Result<Void, AuthenticationService.AuthenticateFailureCause>> authenticate(
+  Single<Result<Void, AuthenticationService.AuthenticateFailure>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate);
 
 }

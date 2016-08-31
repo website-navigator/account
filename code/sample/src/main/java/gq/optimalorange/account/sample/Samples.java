@@ -1,7 +1,7 @@
 package gq.optimalorange.account.sample;
 
-import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
-import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailureCause;
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailure;
+import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailure;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
 import gq.optimalorange.account.SubjectService.CreateFailure;
@@ -29,7 +29,7 @@ public class Samples {
             .setIdentifier(r.result(), password(initPassword), Identifier.username(username))
             .toObservable());
     // 3. change password
-    final Observable<Result<Void, ChangeCertificateFailureCause>> changePassword = signUp
+    final Observable<Result<Void, ChangeCertificateFailure>> changePassword = signUp
         .filter(Result::succeeded)
         .flatMap(r -> serviceComponent.getAuthenticationService()
             .changeCertificate(r.result(), password(initPassword),
@@ -37,7 +37,7 @@ public class Samples {
             .toObservable())
         .cache();
     // 4. authenticate
-    final Observable<Result<Void, AuthenticateFailureCause>> authenticate = changePassword
+    final Observable<Result<Void, AuthenticateFailure>> authenticate = changePassword
         .map(r -> {
           if (r.succeeded()) {
             return changedPassword;

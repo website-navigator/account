@@ -32,7 +32,7 @@ public class AuthenticationServiceRegister {
     });
   }
 
-  Single<Result<AuthenticationSpi, GetServiceFailureCause>> getService(
+  Single<Result<AuthenticationSpi, GetServiceFailure>> getService(
       @Nonnull String type) {
     return Single.create(subscriber -> {
       if (subscriber.isUnsubscribed()) {
@@ -45,10 +45,10 @@ public class AuthenticationServiceRegister {
         return;
       }
       if (result != null) {
-        subscriber.onSuccess(Results.<AuthenticationSpi, GetServiceFailureCause>succeed(result));
+        subscriber.onSuccess(Results.<AuthenticationSpi, GetServiceFailure>succeed(result));
       } else {
-        Result<AuthenticationSpi, GetServiceFailureCause> r =
-            Results.fail(GetServiceFailureCause.NOT_EXIST);
+        Result<AuthenticationSpi, GetServiceFailure> r =
+            Results.fail(GetServiceFailure.NOT_EXIST);
         subscriber.onSuccess(r);
       }
     });
@@ -58,7 +58,7 @@ public class AuthenticationServiceRegister {
     authServices.put(service.authenticationType(), service);
   }
 
-  enum GetServiceFailureCause {
+  enum GetServiceFailure {
     NOT_EXIST
   }
 

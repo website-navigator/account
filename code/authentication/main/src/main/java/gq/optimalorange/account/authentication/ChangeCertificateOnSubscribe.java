@@ -1,8 +1,8 @@
 package gq.optimalorange.account.authentication;
 
 import gq.optimalorange.account.AuthenticationService;
-import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
-import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailureCause;
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailure;
+import gq.optimalorange.account.AuthenticationService.ChangeCertificateFailure;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
@@ -11,7 +11,7 @@ import rx.Single;
 import rx.SingleSubscriber;
 
 public class ChangeCertificateOnSubscribe
-    implements Single.OnSubscribe<Result<Void, ChangeCertificateFailureCause>> {
+    implements Single.OnSubscribe<Result<Void, ChangeCertificateFailure>> {
 
   private final AuthenticationService authenticationService;
   private final AuthenticationServiceRegister serviceRegister;
@@ -34,10 +34,10 @@ public class ChangeCertificateOnSubscribe
 
   @Override
   public void call(
-      SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> subscriber) {
+      SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> subscriber) {
     //TODO SafeSubscriber
     if (!oldCertificate.getType().equals(newCertificate.getType())) {
-      fail(subscriber, ChangeCertificateFailureCause.NOT_SAME_CERTIFICATE_TYPE);
+      fail(subscriber, ChangeCertificateFailure.NOT_SAME_CERTIFICATE_TYPE);
       return;
     }
 
@@ -47,26 +47,26 @@ public class ChangeCertificateOnSubscribe
   }
 
   private void fail(
-      SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> subscriber,
-      ChangeCertificateFailureCause cause) {
+      SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> subscriber,
+      ChangeCertificateFailure cause) {
     if (!subscriber.isUnsubscribed()) {
-      final Result<Void, ChangeCertificateFailureCause> fail = Results.fail(cause);
+      final Result<Void, ChangeCertificateFailure> fail = Results.fail(cause);
       subscriber.onSuccess(fail);
     }
   }
 
   private class AuthenticateSingleSubscriber
-      extends SingleSubscriber<Result<Void, AuthenticateFailureCause>> {
+      extends SingleSubscriber<Result<Void, AuthenticateFailure>> {
 
-    private final SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual;
+    private final SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> actual;
 
     private AuthenticateSingleSubscriber(
-        SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual) {
+        SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> actual) {
       this.actual = actual;
     }
 
     @Override
-    public void onSuccess(Result<Void, AuthenticateFailureCause> authResult) {
+    public void onSuccess(Result<Void, AuthenticateFailure> authResult) {
       if (authResult.succeeded()) {
         onAuthenticateSucceeded();
       } else {
@@ -82,32 +82,32 @@ public class ChangeCertificateOnSubscribe
         if (service.succeeded()) {
           return service.result().changeCertificate(identifier, oldCertificate, newCertificate);
         } else {
-          final Result<Void, ChangeCertificateFailureCause> fail =
-              Results.fail(ChangeCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE);
+          final Result<Void, ChangeCertificateFailure> fail =
+              Results.fail(ChangeCertificateFailure.UNSUPPORTED_CERTIFICATE_TYPE);
           return Single.just(fail);
         }
       }).subscribe(parent);
     }
 
-    private void onAuthenticateFailed(AuthenticateFailureCause cause) {
+    private void onAuthenticateFailed(AuthenticateFailure cause) {
       switch (cause) {
         case UNSUPPORTED_IDENTIFIER_TYPE:
-          fail(actual, ChangeCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+          fail(actual, ChangeCertificateFailure.UNSUPPORTED_IDENTIFIER_TYPE);
           break;
         case SUBJECT_NOT_EXIST:
-          fail(actual, ChangeCertificateFailureCause.SUBJECT_NOT_EXIST);
+          fail(actual, ChangeCertificateFailure.SUBJECT_NOT_EXIST);
           break;
-        case NOT_SUPPORTED_CERTIFICATE_TYPE:
-          fail(actual, ChangeCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+        case UNSUPPORTED_CERTIFICATE_TYPE:
+          fail(actual, ChangeCertificateFailure.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
           break;
         case CERTIFICATE_NOT_EXIST:
-          fail(actual, ChangeCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
+          fail(actual, ChangeCertificateFailure.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
           break;
         case WRONG_CERTIFICATE:
-          fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
+          fail(actual, ChangeCertificateFailure.WRONG_CERTIFICATE);
           break;
         default:
-          fail(actual, ChangeCertificateFailureCause.WRONG_CERTIFICATE);
+          fail(actual, ChangeCertificateFailure.WRONG_CERTIFICATE);
           break;
       }
     }
@@ -121,17 +121,17 @@ public class ChangeCertificateOnSubscribe
   }
 
   private class ChangeCertificateSingleSubscriber
-      extends SingleSubscriber<Result<Void, ChangeCertificateFailureCause>> {
+      extends SingleSubscriber<Result<Void, ChangeCertificateFailure>> {
 
-    private final SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual;
+    private final SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> actual;
 
     private ChangeCertificateSingleSubscriber(
-        SingleSubscriber<? super Result<Void, ChangeCertificateFailureCause>> actual) {
+        SingleSubscriber<? super Result<Void, ChangeCertificateFailure>> actual) {
       this.actual = actual;
     }
 
     @Override
-    public void onSuccess(Result<Void, ChangeCertificateFailureCause> value) {
+    public void onSuccess(Result<Void, ChangeCertificateFailure> value) {
       if (!actual.isUnsubscribed()) {
         actual.onSuccess(value);
       }

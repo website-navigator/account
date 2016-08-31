@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailure;
 import gq.optimalorange.account.Result;
 import gq.optimalorange.account.internalapi.SubjectStorageService;
 import gq.optimalorange.account.internalapi.SubjectStorageService.GetValueFailure;
@@ -31,7 +31,7 @@ public class PasswordAuthenticationTest {
     // given
     SubjectStorageService storage = mock(SubjectStorageService.class);
     given(storage.retrieveValue(any(), any(), any())).willReturn(null);
-    TestSubscriber<Result<Void, AuthenticateFailureCause>> logger = TestSubscriber.create();
+    TestSubscriber<Result<Void, AuthenticateFailure>> logger = TestSubscriber.create();
 
     // when
     PasswordAuthentication test = new PasswordAuthentication(storage);
@@ -54,7 +54,7 @@ public class PasswordAuthenticationTest {
     SubjectStorageService storage = mock(SubjectStorageService.class);
     given(storage.retrieveValue(any(), any(), any())).willReturn(value);
 
-    TestSubscriber<Result<Void, AuthenticateFailureCause>> logger = TestSubscriber.create();
+    TestSubscriber<Result<Void, AuthenticateFailure>> logger = TestSubscriber.create();
 
     // when
     PasswordAuthentication tested = new PasswordAuthentication(storage);

@@ -13,7 +13,7 @@ public interface SubjectService extends Service {
 
   enum CreateFailure {
     CREATE_FAILURE,
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    UNSUPPORTED_CERTIFICATE_TYPE
   }
 
   Single<Result<Void, ExistFailure>> exist(@Nonnull Identifier identifier);

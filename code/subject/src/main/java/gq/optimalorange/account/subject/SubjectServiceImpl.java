@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import gq.optimalorange.account.AuthenticationService.AuthenticateFailureCause;
+import gq.optimalorange.account.AuthenticationService.AuthenticateFailure;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
@@ -41,15 +41,15 @@ public class SubjectServiceImpl implements SubjectService {
     //* 0. check is't initialCertificate.type supported
     final Observable<Result<List<String>, Void>> supportedTypes =
         internalAuthenticationService.getSupportedCertificateTypes().toObservable().cache();
-    // [query supportedTypes failed] return NOT_SUPPORTED_CERTIFICATE_TYPE and TODO log
+    // [query supportedTypes failed] return UNSUPPORTED_CERTIFICATE_TYPE and TODO log
     final Observable<Result<Identifier, CreateFailure>> queryCertTypesFailed = supportedTypes
         .filter(Result::failed)
-        .map(r -> Results.fail(CreateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .map(r -> Results.fail(CreateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
     // [query succeeded][initialCertificate.type not in supported list] return unsupported
     final Observable<Result<Identifier, CreateFailure>> certTypeNotInSupportedList = supportedTypes
         .filter(Result::succeeded)
         .filter(r -> !r.result().contains(initialCertificate.getType()))
-        .map(r -> Results.fail(CreateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .map(r -> Results.fail(CreateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
 
     //* [query succeeded][initialCertificate.type in supported list] 1. create subject
     Observable<Result<Identifier, Void>> create = supportedTypes
@@ -69,13 +69,13 @@ public class SubjectServiceImpl implements SubjectService {
             .addInitialCertificate(result.result(), initialCertificate)
             .toObservable(), Pair::new)
         .cache();
-    // [add failed][NOT_SUPPORTED_CERTIFICATE_TYPE] return NOT_SUPPORTED_CERTIFICATE_TYPE
+    // [add failed][UNSUPPORTED_CERTIFICATE_TYPE] return UNSUPPORTED_CERTIFICATE_TYPE
     // because we have check it at 0., shouldn't goto here. so TODO log this error to admin now
     // TODO maybe this cert type is removed after check at 0., so we should undo create here
     final Observable<Result<Identifier, CreateFailure>> unknownCertType = addInitCert
         .filter(result -> result.b.failed())
-        .filter(r -> r.b.cause() == AddInitialCertificateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE)
-        .map(r -> Results.fail(CreateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .filter(r -> r.b.cause() == AddInitialCertificateFailure.UNSUPPORTED_CERTIFICATE_TYPE)
+        .map(r -> Results.fail(CreateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
 
     // [add succeeded] return Identifier
     final Observable<Result<Identifier, CreateFailure>> succeeded =
@@ -95,7 +95,7 @@ public class SubjectServiceImpl implements SubjectService {
       @Nonnull Identifier who, @Nonnull Certificate forAuthenticate,
       @Nonnull Identifier newIdentifier) {
     // 1. authenticate
-    final Observable<Result<Void, AuthenticateFailureCause>> auth =
+    final Observable<Result<Void, AuthenticateFailure>> auth =
         internalAuthenticationService.authenticate(who, forAuthenticate).toObservable().cache();
     final Observable<Result<Void, SetIdentifierFailure>> authFailed =
         auth.filter(Result::failed).map(r -> {
@@ -104,7 +104,7 @@ public class SubjectServiceImpl implements SubjectService {
               return Results.fail(SetIdentifierFailure.UNSUPPORTED_LOCATING_IDENTIFIER_TYPE);
             case SUBJECT_NOT_EXIST:
               return Results.fail(SetIdentifierFailure.SUBJECT_NOT_EXIST);
-            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+            case UNSUPPORTED_CERTIFICATE_TYPE:
               return Results.fail(SetIdentifierFailure.UNSUPPORTED_CERTIFICATE_TYPE);
             case CERTIFICATE_NOT_EXIST:
               return Results.fail(SetIdentifierFailure.CERTIFICATE_NOT_EXIST);

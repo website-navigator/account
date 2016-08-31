@@ -15,7 +15,7 @@ public interface InternalAuthenticationService extends AuthenticationService {
       @Nonnull Certificate initialCertificate);
 
   enum AddInitialCertificateFailure {
-    NOT_SUPPORTED_CERTIFICATE_TYPE
+    UNSUPPORTED_CERTIFICATE_TYPE
   }
 
 }

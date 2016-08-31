@@ -10,7 +10,7 @@ import gq.optimalorange.account.AuthenticationService;
 import gq.optimalorange.account.Certificate;
 import gq.optimalorange.account.Identifier;
 import gq.optimalorange.account.Result;
-import gq.optimalorange.account.authentication.AuthenticationServiceRegister.GetServiceFailureCause;
+import gq.optimalorange.account.authentication.AuthenticationServiceRegister.GetServiceFailure;
 import gq.optimalorange.account.authentication.spi.AuthenticationSpi;
 import gq.optimalorange.account.internalapi.InternalAuthenticationService;
 import gq.optimalorange.account.internalapi.Results;
@@ -39,16 +39,16 @@ public class MultipleTypeAuthenticationService
   public Single<Result<Void, AddInitialCertificateFailure>> addInitialCertificate(
       @Nonnull Identifier identifier, @Nonnull Certificate initialCertificate) {
     //* 1. getService(initialCertificate.type)
-    Observable<Result<AuthenticationSpi, GetServiceFailureCause>> spi =
+    Observable<Result<AuthenticationSpi, GetServiceFailure>> spi =
         serviceRegister.getService(initialCertificate.getType()).toObservable().cache();
-    // [getService failed] return NOT_SUPPORTED_CERTIFICATE_TYPE
+    // [getService failed] return UNSUPPORTED_CERTIFICATE_TYPE
     final Observable<Result<Void, AddInitialCertificateFailure>> unsupportedCertType = spi
         .filter(Result::failed)
-        .filter(r -> r.cause() == GetServiceFailureCause.NOT_EXIST)
-        .map(r -> Results.fail(AddInitialCertificateFailure.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .filter(r -> r.cause() == GetServiceFailure.NOT_EXIST)
+        .map(r -> Results.fail(AddInitialCertificateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
 
     //* [getService succeeded] 2. addCertificate
-    final Observable<Result<Void, AddCertificateFailureCause>> addCert =
+    final Observable<Result<Void, AddCertificateFailure>> addCert =
         spi
             .filter(Result::succeeded)
             .flatMap(r -> r.result().addCertificate(identifier, initialCertificate).toObservable())
@@ -70,46 +70,46 @@ public class MultipleTypeAuthenticationService
   // 2. getService(initialCertificate.type)
   // 3. addCertificate
   @Override
-  public Single<Result<Void, AddCertificateFailureCause>> addCertificate(
+  public Single<Result<Void, AddCertificateFailure>> addCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate newCertificate) {
     //* 1. authenticate
-    final Observable<Result<Void, AuthenticateFailureCause>> auth =
+    final Observable<Result<Void, AuthenticateFailure>> auth =
         authenticate(identifier, forAuthenticate).toObservable().cache();
     // [auth failed]
-    final Observable<Result<Void, AddCertificateFailureCause>> authFailed =
+    final Observable<Result<Void, AddCertificateFailure>> authFailed =
         auth.filter(Result::failed).map(r -> {
           switch (r.cause()) {
             case UNSUPPORTED_IDENTIFIER_TYPE:
-              return Results.fail(AddCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+              return Results.fail(AddCertificateFailure.UNSUPPORTED_IDENTIFIER_TYPE);
             case SUBJECT_NOT_EXIST:
-              return Results.fail(AddCertificateFailureCause.SUBJECT_NOT_EXIST);
-            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+              return Results.fail(AddCertificateFailure.SUBJECT_NOT_EXIST);
+            case UNSUPPORTED_CERTIFICATE_TYPE:
               return Results
-                  .fail(AddCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+                  .fail(AddCertificateFailure.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
             case CERTIFICATE_NOT_EXIST:
-              return Results.fail(AddCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
+              return Results.fail(AddCertificateFailure.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
             case WRONG_CERTIFICATE:
-              return Results.fail(AddCertificateFailureCause.WRONG_CERTIFICATE);
+              return Results.fail(AddCertificateFailure.WRONG_CERTIFICATE);
             default:
               throw new UnsupportedOperationException("unsupported auth fail cause: " + r.cause());
           }
         });
 
     //* [auth succeeded] 2. getService(initialCertificate.type)
-    final Observable<Result<AuthenticationSpi, GetServiceFailureCause>> spi = auth
+    final Observable<Result<AuthenticationSpi, GetServiceFailure>> spi = auth
         .filter(Result::succeeded)
         .flatMap(r -> serviceRegister.getService(newCertificate.getType()).toObservable())
         .cache();
-    // [getService failed] return NOT_SUPPORTED_CERTIFICATE_TYPE
-    final Observable<Result<Void, AddCertificateFailureCause>> unsupportedCertType = spi
+    // [getService failed] return UNSUPPORTED_CERTIFICATE_TYPE
+    final Observable<Result<Void, AddCertificateFailure>> unsupportedCertType = spi
         .filter(Result::failed)
-        .filter(r -> r.cause() == GetServiceFailureCause.NOT_EXIST)
-        .map(r -> Results.fail(AddCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .filter(r -> r.cause() == GetServiceFailure.NOT_EXIST)
+        .map(r -> Results.fail(AddCertificateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
 
     //* [getService succeeded] 3. addCertificate
-    final Observable<Result<Void, AddCertificateFailureCause>> addCert = spi
+    final Observable<Result<Void, AddCertificateFailure>> addCert = spi
         .filter(Result::succeeded)
         .flatMap(r -> r.result().addCertificate(identifier, newCertificate).toObservable());
     // [addCertificate failed] return this cause
@@ -121,46 +121,46 @@ public class MultipleTypeAuthenticationService
   // 2. getService(initialCertificate.type)
   // 3. removeCertificate
   @Override
-  public Single<Result<Void, RemoveCertificateFailureCause>> removeCertificate(
+  public Single<Result<Void, RemoveCertificateFailure>> removeCertificate(
       @Nonnull Identifier identifier,
       @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate toBeRemoved) {
     //* 1. authenticate
-    final Observable<Result<Void, AuthenticateFailureCause>> auth =
+    final Observable<Result<Void, AuthenticateFailure>> auth =
         authenticate(identifier, forAuthenticate).toObservable().cache();
     // [auth failed]
-    final Observable<Result<Void, RemoveCertificateFailureCause>> authFailed =
+    final Observable<Result<Void, RemoveCertificateFailure>> authFailed =
         auth.filter(Result::failed).map(r -> {
           switch (r.cause()) {
             case UNSUPPORTED_IDENTIFIER_TYPE:
-              return Results.fail(RemoveCertificateFailureCause.UNSUPPORTED_IDENTIFIER_TYPE);
+              return Results.fail(RemoveCertificateFailure.UNSUPPORTED_IDENTIFIER_TYPE);
             case SUBJECT_NOT_EXIST:
-              return Results.fail(RemoveCertificateFailureCause.SUBJECT_NOT_EXIST);
-            case NOT_SUPPORTED_CERTIFICATE_TYPE:
+              return Results.fail(RemoveCertificateFailure.SUBJECT_NOT_EXIST);
+            case UNSUPPORTED_CERTIFICATE_TYPE:
               return Results
-                  .fail(RemoveCertificateFailureCause.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
+                  .fail(RemoveCertificateFailure.UNSUPPORTED_AUTHENTICATE_CERTIFICATE_TYPE);
             case CERTIFICATE_NOT_EXIST:
-              return Results.fail(RemoveCertificateFailureCause.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
+              return Results.fail(RemoveCertificateFailure.AUTHENTICATE_CERTIFICATE_NOT_EXIST);
             case WRONG_CERTIFICATE:
-              return Results.fail(RemoveCertificateFailureCause.WRONG_CERTIFICATE);
+              return Results.fail(RemoveCertificateFailure.WRONG_CERTIFICATE);
             default:
               throw new UnsupportedOperationException("unsupported auth fail cause: " + r.cause());
           }
         });
 
     //* [auth succeeded] 2. getService(initialCertificate.type)
-    final Observable<Result<AuthenticationSpi, GetServiceFailureCause>> spi = auth
+    final Observable<Result<AuthenticationSpi, GetServiceFailure>> spi = auth
         .filter(Result::succeeded)
         .flatMap(r -> serviceRegister.getService(toBeRemoved.getType()).toObservable())
         .cache();
-    // [getService failed] return NOT_SUPPORTED_CERTIFICATE_TYPE
-    final Observable<Result<Void, RemoveCertificateFailureCause>> unsupportedCertType = spi
+    // [getService failed] return UNSUPPORTED_CERTIFICATE_TYPE
+    final Observable<Result<Void, RemoveCertificateFailure>> unsupportedCertType = spi
         .filter(Result::failed)
-        .filter(r -> r.cause() == GetServiceFailureCause.NOT_EXIST)
-        .map(r -> Results.fail(RemoveCertificateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        .filter(r -> r.cause() == GetServiceFailure.NOT_EXIST)
+        .map(r -> Results.fail(RemoveCertificateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
 
     //* [getService succeeded] 3. removeCertificate
-    final Observable<Result<Void, RemoveCertificateFailureCause>> removeCert = spi
+    final Observable<Result<Void, RemoveCertificateFailure>> removeCert = spi
         .filter(Result::succeeded)
         .flatMap(r -> r.result().removeCertificate(identifier, toBeRemoved).toObservable());
     // [addCertificate failed] return this cause
@@ -172,7 +172,7 @@ public class MultipleTypeAuthenticationService
   // 2. getService(initialCertificate.type)
   // 3. changeCertificate
   @Override
-  public Single<Result<Void, ChangeCertificateFailureCause>> changeCertificate(
+  public Single<Result<Void, ChangeCertificateFailure>> changeCertificate(
       @Nonnull Identifier identifier, @Nonnull Certificate forAuthenticate,
       @Nonnull Certificate oldCertificate, @Nonnull Certificate newCertificate) {
     return Single.create(new ChangeCertificateOnSubscribe(
@@ -180,13 +180,13 @@ public class MultipleTypeAuthenticationService
   }
 
   @Override
-  public Single<Result<Void, AuthenticateFailureCause>> authenticate(
+  public Single<Result<Void, AuthenticateFailure>> authenticate(
       @Nonnull Identifier identifier, @Nonnull Certificate certificate) {
     return serviceRegister.getService(certificate.getType()).flatMap(service -> {
       if (service.succeeded()) {
         return service.result().authenticate(identifier, certificate);
       } else {
-        return Single.just(Results.fail(AuthenticateFailureCause.NOT_SUPPORTED_CERTIFICATE_TYPE));
+        return Single.just(Results.fail(AuthenticateFailure.UNSUPPORTED_CERTIFICATE_TYPE));
       }
     });
   }
